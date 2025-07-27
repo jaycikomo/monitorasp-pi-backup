@@ -1835,6 +1835,18 @@
       "interface": "wlan1",
       "event": "UP",
       "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-27T13:50:04.936Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-27T13:50:14.943Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
     }
   ],
   "interfaceStates": {
@@ -1883,9 +1895,9 @@
   },
   "downtimeStats": {
     "wlan0": {
-      "totalDowntime": 870413,
-      "disconnections": 58,
-      "lastDownDuration": 10009
+      "totalDowntime": 880420,
+      "disconnections": 59,
+      "lastDownDuration": 10007
     },
     "wlan1": {
       "totalDowntime": 20902775,

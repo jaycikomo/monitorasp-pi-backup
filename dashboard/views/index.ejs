@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Réseau & Alimentation</title>
-    <meta http-equiv="refresh" content="30">
+    <title>Dashboard Réseau & Administration</title>
+    <meta http-equiv="refresh" content="60">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -17,7 +17,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -43,6 +43,145 @@
         .header p {
             font-size: 1.2em;
             color: #7f8c8d;
+        }
+        
+        .admin-panel {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .admin-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-section h3 {
+            margin-bottom: 15px;
+            color: #ecf0f1;
+        }
+        
+        .backup-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .status-indicator {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .status-success { background: #27ae60; color: white; }
+        .status-warning { background: #f39c12; color: white; }
+        .status-error { background: #e74c3c; color: white; }
+        
+        .admin-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .admin-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .admin-btn.danger {
+            background: #e74c3c;
+            font-size: 1.1em;
+            padding: 15px 30px;
+        }
+        
+        .admin-btn.danger:hover { background: #c0392b; }
+        
+        .admin-btn.warning { background: #f39c12; }
+        .admin-btn.warning:hover { background: #e67e22; }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .service-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .service-name {
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+        
+        .service-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .service-controls .admin-btn {
+            font-size: 0.8em;
+            padding: 6px 12px;
+        }
+        
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .system-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .system-card strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #ecf0f1;
+        }
+        
+        .reboot-section {
+            text-align: center;
+            border-top: 2px solid rgba(255,255,255,0.3);
+            padding-top: 20px;
+            margin-top: 20px;
         }
         
         .stats-overview {
@@ -386,10 +525,82 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><span class="emoji">🌐</span>Dashboard Réseau & Alimentation</h1>
+            <h1><span class="emoji">🌐</span>Dashboard Réseau & Administration</h1>
             <p>Raspberry Pi <%= serverIP %> | <%= new Date().toLocaleString('fr-FR') %></p>
         </div>
 
+        <!-- Panel d'Administration -->
+        <div class="admin-panel">
+            <div class="admin-title">
+                <span class="emoji">🔧</span>Panel d'Administration
+            </div>
+            
+            <!-- Statut du Backup -->
+            <div class="admin-section">
+                <h3>☁️ Backup GitHub</h3>
+                <div class="backup-info">
+                    <span class="status-indicator status-<%= backupStatus.status %>">
+                        <%= backupStatus.status === 'success' ? '✅ OK' : 
+                            backupStatus.status === 'warning' ? '⚠️ Ancien' : '❌ Erreur' %>
+                    </span>
+                    <span>Dernier backup: <%= backupStatus.lastBackup %></span>
+                    <% if (backupStatus.hoursAgo !== undefined) { %>
+                        <span style="color: #bdc3c7;">(il y a <%= backupStatus.hoursAgo %>h)</span>
+                    <% } %>
+                    <button class="admin-btn" onclick="executeBackup()">🚀 Lancer Backup</button>
+                </div>
+            </div>
+
+            <!-- Contrôles Services -->
+            <div class="admin-section">
+                <h3>⚙️ Services Système</h3>
+                <div class="services-grid">
+                    <% servicesStatus.forEach(service => { %>
+                        <div class="service-card">
+                            <div class="service-header">
+                                <span class="service-name"><%= service.name %></span>
+                                <span class="status-indicator <%= service.active ? 'status-success' : 'status-error' %>">
+                                    <%= service.active ? '🟢 Actif' : '🔴 Arrêté' %>
+                                </span>
+                            </div>
+                            <div class="service-controls">
+                                <button class="admin-btn" onclick="controlService('start', '<%= service.name %>')">▶️ Start</button>
+                                <button class="admin-btn warning" onclick="controlService('stop', '<%= service.name %>')">⏸️ Stop</button>
+                                <button class="admin-btn" onclick="controlService('restart', '<%= service.name %>')">🔄 Restart</button>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- Informations Système -->
+            <div class="admin-section">
+                <h3>💻 Informations Système</h3>
+                <div class="system-info">
+                    <div class="system-card">
+                        <strong>⏱️ Uptime</strong>
+                        <%= systemInfo.uptime %>
+                    </div>
+                    <div class="system-card">
+                        <strong>🌡️ Température</strong>
+                        <%= systemInfo.temperature %>
+                    </div>
+                    <div class="system-card">
+                        <strong>⚡ Throttling</strong>
+                        <%= systemInfo.throttled === 'throttled=0x0' ? '✅ OK' : '⚠️ ' + systemInfo.throttled %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton Reboot -->
+            <div class="reboot-section">
+                <button class="admin-btn danger" onclick="confirmReboot()">
+                    🔄 REDÉMARRER LE SYSTÈME
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
         <div class="stats-overview">
             <div class="stat-card">
                 <span class="stat-number"><%= connections.established %></span>
@@ -489,6 +700,7 @@
             </div>
         <% } %>
 
+        <!-- Interfaces -->
         <div class="interfaces-grid">
             <% for (let i = 0; i < availableInterfaces.length; i++) { %>
                 <% let iface = availableInterfaces[i]; %>
@@ -583,94 +795,179 @@
                                     <div class="traffic-label">Total reçu</div>
                                 </div>
                                 <div class="traffic-item">
-                                    <div class="traffic-value">📤 <%= ((totalTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
-                                    <div class="traffic-label">Total envoyé</div>
-                                </div>
-                            </div>
-                        <% } else { %>
-                            <div style="text-align: center; padding: 20px; background: #fff3cd; border-radius: 10px; color: #856404;">
-                                ⚠️ Aucune donnée vnstat disponible
-                            </div>
-                        <% } %>
-                    </div>
-                <% } %>
-            <% } %>
-        </div>
+                                   <div class="traffic-value">📤 <%= ((totalTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
+                                   <div class="traffic-label">Total envoyé</div>
+                               </div>
+                           </div>
+                       <% } else { %>
+                           <div style="text-align: center; padding: 20px; background: #fff3cd; border-radius: 10px; color: #856404;">
+                               ⚠️ Aucune donnée vnstat disponible
+                           </div>
+                       <% } %>
+                   </div>
+               <% } %>
+           <% } %>
+       </div>
 
-        <!-- Historiques des événements -->
-        <div class="events-grid">
-            <!-- Historique des redémarrages -->
-            <div class="history-section">
-                <div class="history-header">
-                    <span class="emoji">🔄</span> Historique des Redémarrages
-                </div>
-                
-                <div class="history-list">
-                    <% if (rebootHistory && rebootHistory.length > 0) { %>
-                        <% for (let i = 0; i < rebootHistory.length; i++) { %>
-                            <% let reboot = rebootHistory[i]; %>
-                            <div class="history-item reboot-item <%= reboot.type %>">
-                                <div class="event-info">
-                                    <span><%= getRebootTypeIcon(reboot.type) %></span>
-                                    <strong style="color: <%= getRebootTypeColor(reboot.type) %>">
-                                        <%= reboot.reason %>
-                                    </strong>
-                                </div>
-                                <div class="event-time">
-                                    📅 <%= new Date(reboot.timestamp).toLocaleString('fr-FR') %>
-                                </div>
-                            </div>
-                        <% } %>
-                    <% } else { %>
-                        <div style="text-align: center; padding: 30px; color: #6c757d;">
-                            <span class="emoji">✅</span> Aucun redémarrage récent détecté
-                        </div>
-                    <% } %>
-                </div>
-            </div>
+       <!-- Historiques des événements -->
+       <div class="events-grid">
+           <!-- Historique des redémarrages -->
+           <div class="history-section">
+               <div class="history-header">
+                   <span class="emoji">🔄</span> Historique des Redémarrages
+               </div>
+               
+               <div class="history-list">
+                   <% if (rebootHistory && rebootHistory.length > 0) { %>
+                       <% for (let i = 0; i < rebootHistory.length; i++) { %>
+                           <% let reboot = rebootHistory[i]; %>
+                           <div class="history-item reboot-item <%= reboot.type %>">
+                               <div class="event-info">
+                                   <span><%= getRebootTypeIcon(reboot.type) %></span>
+                                   <strong style="color: <%= getRebootTypeColor(reboot.type) %>">
+                                       <%= reboot.reason %>
+                                   </strong>
+                               </div>
+                               <div class="event-time">
+                                   📅 <%= new Date(reboot.timestamp).toLocaleString('fr-FR') %>
+                               </div>
+                           </div>
+                       <% } %>
+                   <% } else { %>
+                       <div style="text-align: center; padding: 30px; color: #6c757d;">
+                           <span class="emoji">✅</span> Aucun redémarrage récent détecté
+                       </div>
+                   <% } %>
+               </div>
+           </div>
 
-            <!-- Historique des événements réseau -->
-            <div class="history-section">
-                <div class="history-header">
-                    <span class="emoji">📋</span> Événements Réseau
-                </div>
-                
-                <div class="history-list">
-                    <% if (connectionHistory.length > 0) { %>
-                        <% for (let i = 0; i < connectionHistory.length; i++) { %>
-                            <% let event = connectionHistory[i]; %>
-                            <div class="history-item <%= event.event.toLowerCase() %>">
-                                <div class="event-info">
-                                    <strong><%= event.interface.toUpperCase() %></strong>
-                                    <div class="event-status <%= event.event.toLowerCase() %>">
-                                        <%= event.event === 'UP' ? '🟢 CONNECTÉ' : '🔴 DÉCONNECTÉ' %>
-                                    </div>
-                                    <% if (event.internetStatus !== undefined) { %>
-                                        <span style="font-size: 0.8em;">
-                                            Internet: <%= event.internetStatus ? '🌐 OK' : '❌ KO' %>
-                                        </span>
-                                    <% } %>
-                                </div>
-                                <div class="event-time">
-                                    📅 <%= new Date(event.timestamp).toLocaleString('fr-FR') %>
-                                </div>
-                            </div>
-                        <% } %>
-                    <% } else { %>
-                        <div style="text-align: center; padding: 30px; color: #6c757d;">
-                            <span class="emoji">📭</span> Aucun événement réseau enregistré
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
+           <!-- Historique des événements réseau -->
+           <div class="history-section">
+               <div class="history-header">
+                   <span class="emoji">📋</span> Événements Réseau
+               </div>
+               
+               <div class="history-list">
+                   <% if (connectionHistory.length > 0) { %>
+                       <% for (let i = 0; i < connectionHistory.length; i++) { %>
+                           <% let event = connectionHistory[i]; %>
+                           <div class="history-item <%= event.event.toLowerCase() %>">
+                               <div class="event-info">
+                                   <strong><%= event.interface.toUpperCase() %></strong>
+                                   <div class="event-status <%= event.event.toLowerCase() %>">
+                                       <%= event.event === 'UP' ? '🟢 CONNECTÉ' : '🔴 DÉCONNECTÉ' %>
+                                   </div>
+                                   <% if (event.internetStatus !== undefined) { %>
+                                       <span style="font-size: 0.8em;">
+                                           Internet: <%= event.internetStatus ? '🌐 OK' : '❌ KO' %>
+                                       </span>
+                                   <% } %>
+                               </div>
+                               <div class="event-time">
+                                   📅 <%= new Date(event.timestamp).toLocaleString('fr-FR') %>
+                               </div>
+                           </div>
+                       <% } %>
+                   <% } else { %>
+                       <div style="text-align: center; padding: 30px; color: #6c757d;">
+                           <span class="emoji">📭</span> Aucun événement réseau enregistré
+                       </div>
+                   <% } %>
+               </div>
+           </div>
+       </div>
 
-        <div class="footer">
-            <span class="emoji">🔄</span> Actualisation automatique toutes les 30 secondes | 
-            <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
-                🔗 Interface UPS détaillée
-            </a>
-        </div>
-    </div>
+       <div class="footer">
+           <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes | 
+           <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
+               🔗 Interface UPS détaillée
+           </a>
+       </div>
+   </div>
+
+   <script>
+       function executeBackup() {
+           if (confirm('Lancer une sauvegarde maintenant ?')) {
+               fetch('/admin/backup', { method: 'POST' })
+               .then(response => response.json())
+               .then(data => {
+                   alert(data.message);
+                   if (data.success) location.reload();
+               })
+               .catch(error => {
+                   alert('Erreur: ' + error.message);
+               });
+           }
+       }
+
+       function controlService(action, service) {
+           if (confirm(`${action.toUpperCase()} le service ${service} ?`)) {
+               fetch(`/admin/service/${action}/${service}`, { method: 'POST' })
+               .then(response => response.json())
+               .then(data => {
+                   alert(data.message);
+                   if (data.success) setTimeout(() => location.reload(), 2000);
+               })
+               .catch(error => {
+                   alert('Erreur: ' + error.message);
+               });
+           }
+       }
+
+       function confirmReboot() {
+           const confirmation = prompt('ATTENTION: Redémarrage du système!\n\nTapez "REBOOT" pour confirmer:');
+           if (confirmation === 'REBOOT') {
+               fetch('/admin/reboot', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ confirm: 'REBOOT' })
+               })
+               .then(response => response.json())
+               .then(data => {
+                   alert(data.message);
+                   if (data.success) {
+                       alert('Le système va redémarrer dans 3 secondes...');
+                   }
+               })
+               .catch(error => {
+                   alert('Erreur: ' + error.message);
+               });
+           } else if (confirmation !== null) {
+               alert('Confirmation incorrecte. Redémarrage annulé.');
+           }
+       }
+
+       // Notification d'état
+       function showNotification(message, type = 'info') {
+           const notification = document.createElement('div');
+           notification.style.cssText = `
+               position: fixed;
+               top: 20px;
+               right: 20px;
+               padding: 15px 20px;
+               background: ${type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : '#3498db'};
+               color: white;
+               border-radius: 8px;
+               font-weight: bold;
+               z-index: 1000;
+               box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+           `;
+           notification.textContent = message;
+           document.body.appendChild(notification);
+           
+           setTimeout(() => {
+               notification.remove();
+           }, 5000);
+       }
+
+       // Auto-hide alerts after service operations
+       window.addEventListener('load', function() {
+           // Check URL parameters for service operation results
+           const urlParams = new URLSearchParams(window.location.search);
+           if (urlParams.get('success')) {
+               showNotification('Opération réussie !', 'success');
+           }
+       });
+   </script>
 </body>
 </html>

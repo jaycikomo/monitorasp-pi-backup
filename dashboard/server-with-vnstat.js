@@ -8,6 +8,10 @@ const port = 3000;
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
+// Middleware pour parser les données POST
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 // Stockage des données de monitoring
 let connectionHistory = [];
 let interfaceStates = {};
@@ -42,6 +46,199 @@ function saveMonitoringData() {
     } catch (e) {
         console.log('Erreur sauvegarde données:', e.message);
     }
+}
+
+// Vérifier le statut du dernier backup GitHub
+function getBackupStatus() {
+    return new Promise((resolve) => {
+        const backupDir = '/home/admin/raspberry-backup';
+        
+        // Vérifier la dernière sauvegarde
+        exec(`cd ${backupDir} && git log -1 --format="%ai|%s"`, (error, stdout) => {
+            if (error) {
+                resolve({
+                    status: 'error',
+                    lastBackup: 'Jamais',
+                    message: 'Erreur Git'
+                });
+                return;
+            }
+            
+            const [dateStr, message] = stdout.trim().split('|');
+            const lastBackupDate = new Date(dateStr);
+            const now = new Date();
+            const diffHours = Math.floor((now - lastBackupDate) / (1000 * 60 * 60));
+            
+            let status = 'success';
+            if (diffHours > 25) status = 'warning'; // Plus de 25h
+            if (diffHours > 48) status = 'error';   // Plus de 48h
+            
+            resolve({
+                status: status,
+                lastBackup: lastBackupDate.toLocaleString('fr-FR'),
+                message: message || 'Backup automatique',
+                hoursAgo: diffHours
+            });
+        });
+    });
+}
+
+// Obtenir le statut des services
+function getServicesStatus() {
+    return new Promise((resolve) => {
+        const services = ['vnstat-dashboard', 'watchdog', 'nut-server', 'wg-quick@wg0'];
+        const promises = services.map(service => {
+            return new Promise((resolveService) => {
+                exec(`systemctl is-active ${service}`, (error, stdout) => {
+                    const isActive = stdout.trim() === 'active';
+                    exec(`systemctl is-enabled ${service}`, (error2, stdout2) => {
+                        const isEnabled = stdout2.trim() === 'enabled';
+                        resolveService({
+                            name: service,
+                            active: isActive,
+                            enabled: isEnabled,
+                            status: isActive ? 'running' : 'stopped'
+                        });
+                    });
+                });
+            });
+        });
+        
+        Promise.all(promises).then(resolve);
+    });
+}
+
+// Obtenir les informations système avancées
+function getSystemInfo() {
+    return new Promise((resolve) => {
+        exec('uptime', (error, uptime) => {
+            exec('free -h', (error2, memory) => {
+                exec('df -h /', (error3, disk) => {
+                    exec('cat /sys/class/thermal/thermal_zone0/temp', (error4, temp) => {
+                        exec('vcgencmd get_throttled', (error5, throttled) => {
+                            resolve({
+                                uptime: uptime.trim(),
+                                memory: memory,
+                                disk: disk,
+                                temperature: error4 ? 'N/A' : (parseInt(temp) / 1000).toFixed(1) + '°C',
+                                throttled: throttled ? throttled.trim() : 'N/A'
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
+// Routes d'administration
+app.post('/admin/service/:action/:service', (req, res) => {
+    const { action, service } = req.params;
+    const allowedServices = ['vnstat-dashboard', 'watchdog', 'nut-server', 'wg-quick@wg0'];
+    const allowedActions = ['start', 'stop', 'restart'];
+    
+    if (!allowedServices.includes(service) || !allowedActions.includes(action)) {
+        return res.json({ success: false, message: 'Action non autorisée' });
+    }
+    
+    exec(`sudo systemctl ${action} ${service}`, (error, stdout, stderr) => {
+        if (error) {
+            res.json({ success: false, message: `Erreur: ${error.message}` });
+        } else {
+            res.json({ success: true, message: `Service ${service} ${action} avec succès` });
+        }
+    });
+});
+
+app.post('/admin/backup', (req, res) => {
+    exec('cd /home/admin/raspberry-backup && ./auto-backup.sh', (error, stdout, stderr) => {
+        if (error) {
+            res.json({ success: false, message: `Erreur backup: ${error.message}` });
+        } else {
+            res.json({ success: true, message: 'Backup lancé avec succès' });
+        }
+    });
+});
+
+app.post('/admin/reboot', (req, res) => {
+    const { confirm } = req.body;
+    if (confirm !== 'REBOOT') {
+        return res.json({ success: false, message: 'Confirmation requise' });
+    }
+    
+    res.json({ success: true, message: 'Redémarrage en cours...' });
+    
+    // Redémarrage après 3 secondes
+    setTimeout(() => {
+        exec('sudo reboot');
+    }, 3000);
+});
+
+// Test de connectivité Internet
+function testInternetConnectivity() {
+    return new Promise((resolve) => {
+        exec('ping -c 1 -W 2 8.8.8.8', (error) => {
+            resolve(!error);
+        });
+    });
+}
+
+// Récupérer les données de l'onduleur
+function getUpsData() {
+    return new Promise((resolve) => {
+        exec('upsc eaton650 2>/dev/null', (error, stdout) => {
+            if (error) {
+                resolve({
+                    available: false,
+                    error: 'UPS non disponible'
+                });
+                return;
+            }
+
+            const data = { available: true };
+            const lines = stdout.split('\n');
+            
+            lines.forEach(line => {
+                const [key, value] = line.split(': ');
+                if (key && value) {
+                    switch (key.trim()) {
+                        case 'battery.charge':
+                            data.batteryCharge = parseInt(value);
+                            break;
+                        case 'battery.runtime':
+                            data.batteryRuntime = parseInt(value);
+                            break;
+                        case 'ups.status':
+                            data.status = value.trim();
+                            break;
+                        case 'ups.load':
+                            data.load = parseInt(value);
+                            break;
+                        case 'input.voltage':
+                            data.inputVoltage = parseFloat(value);
+                            break;
+                        case 'output.voltage':
+                            data.outputVoltage = parseFloat(value);
+                            break;
+                        case 'ups.realpower':
+                            data.realPower = parseInt(value);
+                            break;
+                        case 'ups.power.nominal':
+                            data.nominalPower = parseInt(value);
+                            break;
+                        case 'device.model':
+                            data.model = value.trim();
+                            break;
+                        case 'ups.mfr':
+                            data.manufacturer = value.trim();
+                            break;
+                    }
+                }
+            });
+
+            resolve(data);
+        });
+    });
 }
 
 // Récupérer l'historique des redémarrages
@@ -157,73 +354,6 @@ function getRebootTypeIcon(type) {
         case 'watchdog-hardware': return '⚡';
         default: return '🔄';
     }
-}
-
-// Test de connectivité Internet
-function testInternetConnectivity() {
-    return new Promise((resolve) => {
-        exec('ping -c 1 -W 2 8.8.8.8', (error) => {
-            resolve(!error);
-        });
-    });
-}
-
-// Récupérer les données de l'onduleur
-function getUpsData() {
-    return new Promise((resolve) => {
-        exec('upsc eaton650 2>/dev/null', (error, stdout) => {
-            if (error) {
-                resolve({
-                    available: false,
-                    error: 'UPS non disponible'
-                });
-                return;
-            }
-
-            const data = { available: true };
-            const lines = stdout.split('\n');
-            
-            lines.forEach(line => {
-                const [key, value] = line.split(': ');
-                if (key && value) {
-                    switch (key.trim()) {
-                        case 'battery.charge':
-                            data.batteryCharge = parseInt(value);
-                            break;
-                        case 'battery.runtime':
-                            data.batteryRuntime = parseInt(value);
-                            break;
-                        case 'ups.status':
-                            data.status = value.trim();
-                            break;
-                        case 'ups.load':
-                            data.load = parseInt(value);
-                            break;
-                        case 'input.voltage':
-                            data.inputVoltage = parseFloat(value);
-                            break;
-                        case 'output.voltage':
-                            data.outputVoltage = parseFloat(value);
-                            break;
-                        case 'ups.realpower':
-                            data.realPower = parseInt(value);
-                            break;
-                        case 'ups.power.nominal':
-                            data.nominalPower = parseInt(value);
-                            break;
-                        case 'device.model':
-                            data.model = value.trim();
-                            break;
-                        case 'ups.mfr':
-                            data.manufacturer = value.trim();
-                            break;
-                    }
-                }
-            });
-
-            resolve(data);
-        });
-    });
 }
 
 // Formater la durée UPS
@@ -352,7 +482,10 @@ app.get('/', async (req, res) => {
         getUpsStatusText: getUpsStatusText,
         rebootHistory: await getRebootHistory(),
         getRebootTypeColor: getRebootTypeColor,
-        getRebootTypeIcon: getRebootTypeIcon
+        getRebootTypeIcon: getRebootTypeIcon,
+        backupStatus: await getBackupStatus(),
+        servicesStatus: await getServicesStatus(),
+        systemInfo: await getSystemInfo()
     };
 
     console.log('Récupération des connexions...');
