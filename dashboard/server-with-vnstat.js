@@ -666,6 +666,16 @@ app.get('/', async (req, res) => {
 loadMonitoringData();
 setInterval(monitorInterfaces, 10000);
 
+// Route pour le dashboard caméras
+app.get('/cameras', (req, res) => {
+    res.render('cameras');
+});
+
+// Route pour le dashboard caméras
+app.get('/cameras', (req, res) => {
+    res.render('cameras');
+});
+
 app.listen(port, () => {
     console.log(`Dashboard avec monitoring sur http://192.168.1.200:${port}`);
 });
