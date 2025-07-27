@@ -1,0 +1,11 @@
+[Unit]
+Description=Watchdog Protection Boot Check
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/watchdog-protection.sh boot-check
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

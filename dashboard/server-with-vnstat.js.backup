@@ -1,0 +1,244 @@
+const express = require('express');
+const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const app = express();
+const port = 3000;
+
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
+// Stockage des données de monitoring
+let connectionHistory = [];
+let interfaceStates = {};
+let downtimeStats = {};
+
+// Fichier pour persister les données
+const dataFile = path.join(__dirname, 'monitoring-data.json');
+
+// Charger les données sauvegardées
+function loadMonitoringData() {
+    try {
+        if (fs.existsSync(dataFile)) {
+            const data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+            connectionHistory = data.connectionHistory || [];
+            interfaceStates = data.interfaceStates || {};
+            downtimeStats = data.downtimeStats || {};
+        }
+    } catch (e) {
+        console.log('Erreur chargement données:', e.message);
+    }
+}
+
+// Sauvegarder les données
+function saveMonitoringData() {
+    try {
+        const data = {
+            connectionHistory: connectionHistory.slice(-1000), // Garde les 1000 derniers événements
+            interfaceStates,
+            downtimeStats
+        };
+        fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+    } catch (e) {
+        console.log('Erreur sauvegarde données:', e.message);
+    }
+}
+
+// Test de connectivité Internet
+function testInternetConnectivity() {
+    return new Promise((resolve) => {
+        exec('ping -c 1 -W 2 8.8.8.8', (error) => {
+            resolve(!error);
+        });
+    });
+}
+
+// Monitoring des interfaces
+async function monitorInterfaces() {
+    const now = new Date();
+    
+    // Test connectivité Internet
+    const internetUp = await testInternetConnectivity();
+    
+    // État des interfaces
+    exec('ip link show', (error, stdout) => {
+        if (!error) {
+            const lines = stdout.split('\n');
+            const currentStates = {};
+            
+            lines.forEach(line => {
+                const match = line.match(/^\d+:\s+(\w+).*state\s+(\w+)/);
+                if (match && match[1] !== 'lo') {
+                    const ifaceName = match[1];
+                    const isUp = match[2].toLowerCase() === 'up';
+                    currentStates[ifaceName] = isUp;
+                    
+                    // Détecter changement d'état
+                    if (interfaceStates[ifaceName] !== undefined && interfaceStates[ifaceName] !== isUp) {
+                        const event = {
+                            timestamp: now.toISOString(),
+                            interface: ifaceName,
+                            event: isUp ? 'UP' : 'DOWN',
+                            internetStatus: internetUp
+                        };
+                        
+                        connectionHistory.push(event);
+                        
+                        // Calculer downtime si c'est un UP
+                        if (isUp && downtimeStats[ifaceName] && downtimeStats[ifaceName].lastDown) {
+                            const downDuration = now - new Date(downtimeStats[ifaceName].lastDown);
+                            if (!downtimeStats[ifaceName].totalDowntime) downtimeStats[ifaceName].totalDowntime = 0;
+                            if (!downtimeStats[ifaceName].disconnections) downtimeStats[ifaceName].disconnections = 0;
+                            
+                            downtimeStats[ifaceName].totalDowntime += downDuration;
+                            downtimeStats[ifaceName].disconnections++;
+                            downtimeStats[ifaceName].lastDownDuration = downDuration;
+                            delete downtimeStats[ifaceName].lastDown;
+                        } else if (!isUp) {
+                            if (!downtimeStats[ifaceName]) downtimeStats[ifaceName] = {};
+                            downtimeStats[ifaceName].lastDown = now.toISOString();
+                        }
+                        
+                        console.log(`Interface ${ifaceName} ${isUp ? 'UP' : 'DOWN'} - Internet: ${internetUp ? 'OK' : 'KO'}`);
+                    }
+                    
+                    interfaceStates[ifaceName] = isUp;
+                }
+            });
+        }
+    });
+    
+    saveMonitoringData();
+}
+
+// Formater la durée
+function formatDuration(ms) {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days}j ${hours % 24}h`;
+    if (hours > 0) return `${hours}h ${minutes % 60}m`;
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    return `${seconds}s`;
+}
+
+app.get('/', (req, res) => {
+    const pageData = {
+        connections: { total: 0, established: 0, listening: 0 },
+        availableInterfaces: ['eth0', 'wlan0', 'wlan1', 'docker0', 'vethd9a58b9'],
+        vnstatData: {},
+        interfaceStatus: {},
+        serverIP: '192.168.1.200',
+        connectionHistory: connectionHistory.slice(-20).reverse(), // 20 derniers événements
+        downtimeStats: downtimeStats,
+        formatDuration: formatDuration
+    };
+
+    console.log('Récupération des connexions...');
+    // Connexions
+    exec('ss -tuln | wc -l', (error, stdout) => {
+        if (!error) {
+            pageData.connections.total = Math.max(0, parseInt(stdout.trim()) - 1);
+        }
+        exec('ss -t | grep ESTAB | wc -l', (error2, stdout2) => {
+            if (!error2) {
+                pageData.connections.established = parseInt(stdout2.trim()) || 0;
+            }
+            exec('ss -l | wc -l', (error3, stdout3) => {
+                if (!error3) {
+                    pageData.connections.listening = Math.max(0, parseInt(stdout3.trim()) - 1);
+                }
+                console.log('Récupération du statut des interfaces...');
+// Statut des interfaces avec IP et SSID
+exec('ip link show', (error4, stdout4) => {
+    if (!error4) {
+        const lines = stdout4.split('\n');
+        lines.forEach(line => {
+            const match = line.match(/^\d+:\s+(\w+).*state\s+(\w+)/);
+            if (match && match[1] !== 'lo') {
+                pageData.interfaceStatus[match[1]] = {
+                    name: match[1],
+                    up: match[2].toLowerCase() === 'up',
+                    ip: '',
+                    ssid: ''
+                };
+            }
+        });
+    }
+    
+    // Récupération des adresses IP
+    exec('ip addr show', (errorIP, stdoutIP) => {
+        if (!errorIP) {
+            const sections = stdoutIP.split(/^\d+:/m);
+            sections.forEach(section => {
+                const ifaceMatch = section.match(/^\s+(\w+):/);
+                if (ifaceMatch && pageData.interfaceStatus[ifaceMatch[1]]) {
+                    const ipMatch = section.match(/inet (\d+\.\d+\.\d+\.\d+)/);
+                    if (ipMatch) {
+                        pageData.interfaceStatus[ifaceMatch[1]].ip = ipMatch[1];
+                    }
+                }
+            });
+        }
+        
+        // Récupération des SSID pour les interfaces Wi-Fi
+        let ssidPromises = [];
+        Object.keys(pageData.interfaceStatus).forEach(iface => {
+            if (iface.startsWith('wlan')) {
+                ssidPromises.push(new Promise(resolve => {
+                    exec(`iwconfig ${iface} 2>/dev/null | grep ESSID | awk -F'"' '{print $2}'`, (errorSSID, stdoutSSID) => {
+                        if (!errorSSID && stdoutSSID.trim()) {
+                            pageData.interfaceStatus[iface].ssid = stdoutSSID.trim();
+                        }
+                        resolve();
+                    });
+                }));
+            }
+        });
+        
+        Promise.all(ssidPromises).then(() => {
+            console.log('Récupération des données vnstat...');
+            // Récupération des données vnstat pour toutes les interfaces
+            const getVnstatData = (interfaces, index = 0) => {
+                if (index >= interfaces.length) {
+                    console.log('Rendu de la page...');
+                    res.render('index', pageData);
+                    return;
+                }
+                
+                const iface = interfaces[index];
+                exec(`vnstat -i ${iface} --json`, (error, stdout) => {
+                    if (!error && stdout) {
+                        try {
+                            const data = JSON.parse(stdout);
+                            if (data.interfaces && data.interfaces.length > 0) {
+                                pageData.vnstatData[iface] = data.interfaces[0];
+                                console.log(`Données vnstat ${iface} récupérées`);
+                            }
+                        } catch (e) {
+                            console.log(`Erreur parsing vnstat ${iface}:`, e.message);
+                        }
+                    } else {
+                        console.log(`Erreur vnstat ${iface}:`, error ? error.message : 'pas de données');
+                    }
+                    getVnstatData(interfaces, index + 1);
+                });
+            };
+
+            getVnstatData(['eth0', 'wlan0', 'wlan1']);
+        });
+    });
+});
+   
+// Charger les données au démarrage
+loadMonitoringData();
+
+// Monitoring périodique toutes les 10 secondes
+setInterval(monitorInterfaces, 10000);
+
+app.listen(port, () => {
+    console.log(`Dashboard avec monitoring sur http://192.168.1.200:${port}`);
+});
+}

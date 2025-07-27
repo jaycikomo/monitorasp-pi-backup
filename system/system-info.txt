@@ -1,0 +1,15 @@
+Backup créé le: 2025-07-27_14-56-08
+Raspberry Pi Model: Raspberry Pi 3 Model B Plus Rev 1.3
+OS Version: PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+Kernel: 6.12.34+rpt-rpi-v8
+Uptime:  14:56:10 up 3 min,  4 users,  load average: 1.27, 1.93, 0.90
+Services actifs:
+  nut-driver-enumerator.path                                                                                                loaded active waiting   nut-driver-enumerator.path
+  nut-driver@eaton650.service                                                                                               loaded active running   Network UPS Tools - device driver for NUT device 'eaton650'
+  nut-server.service                                                                                                        loaded active running   Network UPS Tools - power devices information server
+  vnstat-dashboard.service                                                                                                  loaded active running   VnStat Dashboard Node.js Server
+  vnstat.service                                                                                                            loaded active running   vnStat network traffic monitor
+  wd_keepalive.service                                                                                                      loaded active running   watchdog keepalive daemon
+  system-nut\x2ddriver.slice                                                                                                loaded active active    Slice /system/nut-driver
+  nut-driver.target                                                                                                         loaded active active    Network UPS Tools - target for power device drivers on this system
+  nut.target                                                                                                                loaded active active    Network UPS Tools - target for power device drivers, data server and monitoring client (if enabled) on this system
