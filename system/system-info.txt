@@ -1,15 +1,16 @@
-Backup créé le: 2025-07-27_16-07-38
+Backup créé le: 2025-07-27_16-51-22
 Raspberry Pi Model: Raspberry Pi 3 Model B Plus Rev 1.3
 OS Version: PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
 Kernel: 6.12.34+rpt-rpi-v8
-Uptime:  16:07:41 up  1:15,  4 users,  load average: 0.51, 0.81, 0.72
+Uptime:  16:51:25 up 6 min,  4 users,  load average: 0.55, 1.67, 1.08
 Services actifs:
   nut-driver-enumerator.path                                                                                                loaded active waiting   nut-driver-enumerator.path
   nut-driver@eaton650.service                                                                                               loaded active running   Network UPS Tools - device driver for NUT device 'eaton650'
   nut-server.service                                                                                                        loaded active running   Network UPS Tools - power devices information server
   vnstat-dashboard.service                                                                                                  loaded active running   VnStat Dashboard Node.js Server
   vnstat.service                                                                                                            loaded active running   vnStat network traffic monitor
-  wd_keepalive.service                                                                                                      loaded active running   watchdog keepalive daemon
+  watchdog-protection.service                                                                                               loaded active exited    Watchdog Protection Boot Check
+  watchdog.service                                                                                                          loaded active running   watchdog daemon
   system-nut\x2ddriver.slice                                                                                                loaded active active    Slice /system/nut-driver
   nut-driver.target                                                                                                         loaded active active    Network UPS Tools - target for power device drivers on this system
   nut.target                                                                                                                loaded active active    Network UPS Tools - target for power device drivers, data server and monitoring client (if enabled) on this system
