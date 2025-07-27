@@ -1,8 +1,8 @@
-Backup créé le: 2025-07-27_14-56-08
+Backup créé le: 2025-07-27_15-34-49
 Raspberry Pi Model: Raspberry Pi 3 Model B Plus Rev 1.3
 OS Version: PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
 Kernel: 6.12.34+rpt-rpi-v8
-Uptime:  14:56:10 up 3 min,  4 users,  load average: 1.27, 1.93, 0.90
+Uptime:  15:34:52 up 42 min,  4 users,  load average: 0.14, 0.22, 0.50
 Services actifs:
   nut-driver-enumerator.path                                                                                                loaded active waiting   nut-driver-enumerator.path
   nut-driver@eaton650.service                                                                                               loaded active running   Network UPS Tools - device driver for NUT device 'eaton650'

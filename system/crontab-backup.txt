@@ -27,3 +27,8 @@
 # Surveillance des interfaces réseau - vérification toutes les minutes
 * * * * * /home/admin/interface-watchdog.sh
 
+# Backup automatique quotidien à 2h du matin
+0 2 * * * /home
+
+# Backup automatique quotidien à 2h du matin
+0 2 * * * /home/admin/raspberry-backup/auto-backup.sh
