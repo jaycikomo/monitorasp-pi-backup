@@ -7,595 +7,45 @@
     <meta http-equiv="refresh" content="60">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header p {
-            font-size: 1.2em;
-            color: #7f8c8d;
-        }
-        
-        .admin-panel {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .admin-title {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .admin-section {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .admin-section h3 {
-            margin-bottom: 15px;
-            color: #ecf0f1;
-        }
-        
-        .backup-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .status-indicator {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1600px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea; }
+        .header h1 { font-size: 2.5em; color: #2c3e50; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; color: #7f8c8d; }
+        .admin-panel { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; }
+        .admin-title { font-size: 1.8em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .admin-section { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .admin-section h3 { margin-bottom: 15px; color: #ecf0f1; }
+        .status-indicator { padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; display: inline-block; }
         .status-success { background: #27ae60; color: white; }
         .status-warning { background: #f39c12; color: white; }
         .status-error { background: #e74c3c; color: white; }
-        
-        .admin-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin: 5px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .admin-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .admin-btn.danger {
-            background: #e74c3c;
-            font-size: 1.1em;
-            padding: 15px 30px;
-        }
-        
-        .admin-btn.danger:hover { background: #c0392b; }
-        
+        .admin-btn { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 5px; text-decoration: none; display: inline-block; }
+        .admin-btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .admin-btn.danger { background: #e74c3c; font-size: 1.1em; padding: 15px 30px; }
         .admin-btn.warning { background: #f39c12; }
-        .admin-btn.warning:hover { background: #e67e22; }
-        
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-        }
-        
-        .service-card {
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .service-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .service-name {
-            font-weight: bold;
-            color: #ecf0f1;
-        }
-        
-        .service-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .service-controls .admin-btn {
-            font-size: 0.8em;
-            padding: 6px 12px;
-        }
-        
-        .system-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .system-card {
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .system-card strong {
-            display: block;
-            margin-bottom: 8px;
-            color: #ecf0f1;
-        }
-        
-        .reboot-section {
-            text-align: center;
-            border-top: 2px solid rgba(255,255,255,0.3);
-            padding-top: 20px;
-            margin-top: 20px;
-        }
-        
-        .stats-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transform: translateY(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .uptime-kuma-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-left: 6px solid #1976d2;
-        }
-        
-        .uptime-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .uptime-title {
-            font-size: 1.8em;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .uptime-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .uptime-metric {
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .uptime-metric-value {
-            font-size: 2em;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .uptime-metric-label {
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        
-        .uptime-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .uptime-link {
-            text-decoration: none;
-        }
-        
-        .uptime-link-card {
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid;
-            transition: all 0.3s ease;
-        }
-        
-        .uptime-link-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .ups-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-left: 6px solid #ffc107;
-        }
-        
-        .ups-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .ups-title {
-            font-size: 1.8em;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .ups-status {
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        
-        .ups-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .ups-metric {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .ups-metric-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #495057;
-            display: block;
-        }
-        
-        .ups-metric-label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        .battery-bar {
-            width: 100%;
-            height: 20px;
-            background: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        
-        .battery-fill {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-        
-        .interfaces-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .interface-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            border-left: 6px solid #28a745;
-            transition: all 0.3s ease;
-        }
-        
-        .interface-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        }
-        
-        .interface-card.down {
-            border-left-color: #dc3545;
-        }
-        
-        .interface-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .interface-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-up {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-down {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .interface-info {
-            margin-bottom: 20px;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .info-value {
-            color: #667eea;
-            font-weight: 500;
-        }
-        
-        .signal-bar {
-            display: inline-block;
-            width: 60px;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-left: 10px;
-        }
-        
-        .signal-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .traffic-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .traffic-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .traffic-value {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #495057;
-        }
-        
-        .traffic-label {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        .events-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .history-section {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-        
-        .history-header {
-            font-size: 1.6em;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .history-list {
-            max-height: 350px;
-            overflow-y: auto;
-        }
-        
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            margin: 6px 0;
-            border-radius: 8px;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
-        }
-        
-        .history-item:hover {
-            background: #e9ecef;
-            transform: translateX(3px);
-        }
-        
-        .history-item.up {
-            border-left: 4px solid #28a745;
-        }
-        
-        .history-item.down {
-            border-left: 4px solid #dc3545;
-        }
-        
-        .reboot-item {
-            border-left: 4px solid;
-        }
-        
-        .reboot-item.system {
-            border-left-color: #17a2b8;
-        }
-        
-        .reboot-item.watchdog-network {
-            border-left-color: #ffc107;
-        }
-        
-        .reboot-item.watchdog-hardware {
-            border-left-color: #dc3545;
-        }
-        
-        .event-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .event-status {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: bold;
-        }
-        
-        .event-status.up {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .event-status.down {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .event-time {
-            font-size: 0.85em;
-            color: #6c757d;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 10px;
-            color: #6c757d;
-        }
-        
-        .emoji {
-            font-size: 1.2em;
-            margin-right: 8px;
-        }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .service-card { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; }
+        .service-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .service-name { font-weight: bold; color: #ecf0f1; }
+        .service-controls { display: flex; gap: 8px; }
+        .service-controls .admin-btn { font-size: 0.8em; padding: 6px 12px; }
+        .system-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .system-card { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; text-align: center; }
+        .system-card strong { display: block; margin-bottom: 8px; color: #ecf0f1; }
+        .reboot-section { text-align: center; border-top: 2px solid rgba(255,255,255,0.3); padding-top: 20px; margin-top: 20px; }
+        .stats-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+        .uptime-kuma-section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid #1976d2; }
+        .uptime-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .uptime-title { font-size: 1.8em; color: #2c3e50; display: flex; align-items: center; gap: 10px; }
+        .uptime-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .uptime-metric { padding: 20px; border-radius: 10px; text-align: center; }
+        .uptime-metric-value { font-size: 2em; font-weight: bold; display: block; }
+        .uptime-metric-label { font-size: 0.9em; margin-top: 5px; }
+        .emoji { font-size: 1.2em; margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -603,9 +53,7 @@
         <div class="header">
             <h1><span class="emoji">🌐</span>Dashboard Réseau & Administration</h1>
             <p>Raspberry Pi <%= serverIP %> | <%= new Date().toLocaleString('fr-FR') %></p>
-        </div>
-
-        <!-- Panel d'Administration -->
+        </div><!-- Panel d'Administration -->
         <div class="admin-panel">
             <div class="admin-title">
                 <span class="emoji">🔧</span>Panel d'Administration
@@ -702,9 +150,7 @@
                 <span class="stat-number"><%= uptimeKumaData.stats.total %></span>
                 <span class="stat-label">📹 Monitors Surveillance</span>
             </div>
-        </div>
-
-        <!-- Section Uptime Kuma -->
+        </div><!-- Section Uptime Kuma -->
         <div class="uptime-kuma-section">
             <div class="uptime-header">
                 <div class="uptime-title">
@@ -761,47 +207,61 @@
                     </div>
                 </div>
 
-                <!-- Aperçu iframe -->
+                <!-- Grille des monitors avec aperçu -->
                 <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h4 style="margin: 0; color: #495057;">📱 Aperçu Dashboard</h4>
-                        <button onclick="toggleUptimeKumaPreview()" class="admin-btn" style="font-size: 0.8em; padding: 6px 12px;">
-                            👁️ Afficher/Masquer
-                        </button>
-                    </div>
-                    <div id="uptime-kuma-preview" style="display: none;">
-                        <iframe 
-                            src="<%= uptimeKumaData.url %>" 
-                            width="100%" 
-                            height="400" 
-                            frameborder="0"
-                            style="border-radius: 8px; border: 1px solid #dee2e6;">
-                        </iframe>
-                    </div>
-                </div>
-
-                <!-- Liens rapides -->
-                <div class="uptime-links">
-                    <a href="<%= uptimeKumaData.url %>" target="_blank" class="uptime-link">
-                        <div class="uptime-link-card" style="background: #e7f3ff; border-color: #b3d7ff;">
-                            <div style="font-size: 1.2em; margin-bottom: 5px;">📊</div>
-                            <div style="color: #0066cc; font-weight: bold;">Dashboard Principal</div>
-                        </div>
-                    </a>
+                    <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Aperçu Monitors</h4>
                     
-                    <a href="http://192.168.1.200:3001/settings" target="_blank" class="uptime-link">
-                        <div class="uptime-link-card" style="background: #f0f8f0; border-color: #b3d7b3;">
-                            <div style="font-size: 1.2em; margin-bottom: 5px;">⚙️</div>
-                            <div style="color: #006600; font-weight: bold;">Paramètres</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamAbriMoto</div>
+                            <div style="font-size: 0.8em; color: #155724;">99.73% UP</div>
                         </div>
-                    </a>
-
-                    <a href="http://192.168.1.200:3001/add" target="_blank" class="uptime-link">
-                        <div class="uptime-link-card" style="background: #fff0f0; border-color: #ffb3b3;">
-                            <div style="font-size: 1.2em; margin-bottom: 5px;">➕</div>
-                            <div style="color: #cc0000; font-weight: bold;">Ajouter Monitor</div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamAtelier</div>
+                            <div style="font-size: 0.8em; color: #155724;">71.39% UP</div>
                         </div>
-                    </a>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamEnclos</div>
+                            <div style="font-size: 0.8em; color: #155724;">87.95% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamEntree</div>
+                            <div style="font-size: 0.8em; color: #155724;">71.76% UP</div>
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #ffc107;">
+                            <div style="font-weight: bold; color: #856404;">🟡 CamExtVoiture</div>
+                            <div style="font-size: 0.8em; color: #856404;">27.60% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamLocalPiscine</div>
+                            <div style="font-size: 0.8em; color: #155724;">81.34% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamParking</div>
+                            <div style="font-size: 0.8em; color: #155724;">87.65% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamPiscineExterieure</div>
+                            <div style="font-size: 0.8em; color: #155724;">63.60% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 CamPortail</div>
+                            <div style="font-size: 0.8em; color: #155724;">87.67% UP</div>
+                        </div>
+                        
+                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
+                            <div style="font-weight: bold; color: #155724;">🟢 monitorasp</div>
+                            <div style="font-size: 0.8em; color: #155724;">100% UP</div>
+                        </div>
+                    </div>
                 </div>
 
             <% } else { %>
@@ -809,366 +269,244 @@
                 <div style="text-align: center; padding: 30px; background: #f8d7da; border-radius: 10px; color: #721c24;">
                     <div style="font-size: 3em; margin-bottom: 15px;">🚫</div>
                     <h3>Service Uptime Kuma non accessible</h3>
-                    <p>Vérifiez que le service est démarré : <code>sudo systemctl status uptime-kuma</code></p>
+                    <p>Vérifiez que le service est démarré</p>
                     <div style="margin-top: 20px;">
                         <a href="<%= uptimeKumaData.url %>" target="_blank" class="admin-btn danger">
                             🔗 Essayer d'accéder
                         </a>
-                        <button class="admin-btn" onclick="controlService('restart', 'uptime-kuma')">
-                            🔄 Redémarrer Service
-                        </button>
                     </div>
                 </div>
             <% } %>
-        </div>
-
-        <!-- Section UPS/Onduleur -->
+        </div><!-- Section UPS/Onduleur -->
         <% if (upsData.available) { %>
-            <div class="ups-section">
-                <div class="ups-header">
-                    <div class="ups-title">
+            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid #ffc107;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="font-size: 1.8em; color: #2c3e50; display: flex; align-items: center; gap: 10px;">
                         <span class="emoji">⚡</span>
                         Onduleur <%= upsData.manufacturer || 'EATON' %> <%= upsData.model || 'Ellipse ECO 650' %>
                     </div>
-                    <div class="ups-status" style="background-color: <%= getUpsStatusColor(upsData.status) %>; color: white;">
+                    <div style="padding: 10px 20px; border-radius: 25px; font-weight: bold; font-size: 0.9em; background-color: <%= getUpsStatusColor(upsData.status) %>; color: white;">
                         <%= getUpsStatusText(upsData.status) %>
                     </div>
                 </div>
 
-                <div class="ups-grid">
-                    <div class="ups-metric">
-                        <span class="ups-metric-value" style="color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>">
-                           <%= upsData.batteryCharge || 'N/A' %>%
-                       </span>
-                       <div class="ups-metric-label">🔋 Charge Batterie</div>
-                       <% if (upsData.batteryCharge) { %>
-                           <div class="battery-bar">
-                               <div class="battery-fill" style="width: <%= upsData.batteryCharge %>%; background-color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>"></div>
-                           </div>
-                       <% } %>
-                   </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>; display: block;">
+                            <%= upsData.batteryCharge || 'N/A' %>%
+                        </span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">🔋 Charge Batterie</div>
+                        <% if (upsData.batteryCharge) { %>
+                            <div style="width: 100%; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 10px 0;">
+                                <div style="height: 100%; border-radius: 10px; transition: width 0.3s ease; width: <%= upsData.batteryCharge %>%; background-color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>"></div>
+                            </div>
+                        <% } %>
+                    </div>
 
-                   <div class="ups-metric">
-                       <span class="ups-metric-value"><%= formatUpsRuntime(upsData.batteryRuntime) %></span>
-                       <div class="ups-metric-label">⏱️ Autonomie Restante</div>
-                   </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: #495057; display: block;"><%= formatUpsRuntime(upsData.batteryRuntime) %></span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">⏱️ Autonomie Restante</div>
+                    </div>
 
-                   <div class="ups-metric">
-                       <span class="ups-metric-value"><%= upsData.load || 'N/A' %>%</span>
-                       <div class="ups-metric-label">📊 Charge Actuelle</div>
-                   </div>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: #495057; display: block;"><%= upsData.load || 'N/A' %>%</span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">📊 Charge Actuelle</div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
 
-                   <div class="ups-metric">
-                       <span class="ups-metric-value"><%= upsData.realPower || 'N/A' %>W</span>
-                       <div class="ups-metric-label">⚡ Puissance Réelle</div>
-                       <% if (upsData.nominalPower) { %>
-                           <small style="color: #6c757d;">/ <%= upsData.nominalPower %>W</small>
-                       <% } %>
-                   </div>
+        <!-- Interfaces -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 40px;">
+            <% for (let i = 0; i < availableInterfaces.length; i++) { %>
+                <% let iface = availableInterfaces[i]; %>
+                <% if (interfaceStatus[iface]) { %>
+                    <div style="background: white; border-radius: 15px; padding: 25px; border-left: 6px solid <%= interfaceStatus[iface].up ? '#28a745' : '#dc3545' %>;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #2c3e50;">
+                                <span class="emoji">
+                                    <%= iface === 'eth0' ? '🔌' : iface.indexOf('wlan') >= 0 ? '📶' : iface.indexOf('docker') >= 0 ? '🐳' : '🔗' %>
+                                </span>
+                                <%= iface.toUpperCase() %>
+                            </div>
+                            <div style="padding: 8px 16px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; <%= interfaceStatus[iface].up ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
+                                <%= interfaceStatus[iface].up ? 'UP' : 'DOWN' %>
+                            </div>
+                        </div>
 
-                   <% if (upsData.inputVoltage) { %>
-                       <div class="ups-metric">
-                           <span class="ups-metric-value"><%= upsData.inputVoltage %>V</span>
-                           <div class="ups-metric-label">🔌 Tension Entrée</div>
-                       </div>
-                   <% } %>
+                        <div style="margin-bottom: 20px;">
+                            <% if (interfaceStatus[iface].ip) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">🌐 Adresse IP</span>
+                                    <span style="color: #667eea; font-weight: 500;"><%= interfaceStatus[iface].ip %></span>
+                                </div>
+                            <% } %>
+                            
+                            <% if (interfaceStatus[iface].ssid) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">📡 Réseau Wi-Fi</span>
+                                    <span style="color: #667eea; font-weight: 500;"><%= interfaceStatus[iface].ssid %></span>
+                                </div>
+                            <% } %>
 
-                   <% if (upsData.outputVoltage) { %>
-                       <div class="ups-metric">
-                           <span class="ups-metric-value"><%= upsData.outputVoltage %>V</span>
-                           <div class="ups-metric-label">🔌 Tension Sortie</div>
-                       </div>
-                   <% } %>
-               </div>
-           </div>
-       <% } else { %>
-           <div class="ups-section" style="border-left-color: #dc3545;">
-               <div class="ups-header">
-                   <div class="ups-title">
-                       <span class="emoji">⚡</span>
-                       Onduleur UPS
-                   </div>
-                   <div class="ups-status" style="background-color: #dc3545; color: white;">
-                       NON DISPONIBLE
-                   </div>
-               </div>
-               <p style="text-align: center; color: #6c757d; margin-top: 20px;">
-                   <%= upsData.error || 'Onduleur non détecté ou service NUT non configuré' %>
-               </p>
-           </div>
-       <% } %>
+                            <% if (interfaceStatus[iface].signalQuality !== null) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">📶 Qualité Signal</span>
+                                    <span style="color: #667eea; font-weight: 500;">
+                                        <strong style="color: <%= getSignalColor(interfaceStatus[iface].signalQuality) %>">
+                                            <%= interfaceStatus[iface].signalQuality %>%
+                                        </strong>
+                                    </span>
+                                </div>
+                            <% } %>
+                        </div>
 
-       <!-- Interfaces -->
-       <div class="interfaces-grid">
-           <% for (let i = 0; i < availableInterfaces.length; i++) { %>
-               <% let iface = availableInterfaces[i]; %>
-               <% if (interfaceStatus[iface]) { %>
-                   <div class="interface-card <%= interfaceStatus[iface].up ? '' : 'down' %>">
-                       <div class="interface-header">
-                           <div class="interface-title">
-                               <span class="emoji">
-                                   <%= iface === 'eth0' ? '🔌' : iface.indexOf('wlan') >= 0 ? '📶' : iface.indexOf('docker') >= 0 ? '🐳' : '🔗' %>
-                               </span>
-                               <%= iface.toUpperCase() %>
-                           </div>
-                           <div class="status-badge <%= interfaceStatus[iface].up ? 'status-up' : 'status-down' %>">
-                               <%= interfaceStatus[iface].up ? 'UP' : 'DOWN' %>
-                           </div>
-                       </div>
+                        <% if (vnstatData[iface] && vnstatData[iface].traffic && vnstatData[iface].traffic.day) { %>
+                            <% let dayTraffic = vnstatData[iface].traffic.day[0] || {}; %>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 1.4em; font-weight: bold; color: #495057;">📥 <%= ((dayTraffic.rx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
+                                    <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">Reçu aujourd'hui</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 1.4em; font-weight: bold; color: #495057;">📤 <%= ((dayTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
+                                    <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">Envoyé aujourd'hui</div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } %>
+        </div><!-- Historiques des événements -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px;">
+            <!-- Historique des redémarrages -->
+            <div style="background: white; border-radius: 15px; padding: 30px;">
+                <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
+                    <span class="emoji">🔄</span> Historique des Redémarrages
+                </div>
+                
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <% if (rebootHistory && rebootHistory.length > 0) { %>
+                        <% for (let i = 0; i < rebootHistory.length; i++) { %>
+                            <% let reboot = rebootHistory[i]; %>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 6px 0; border-radius: 8px; background: #f8f9fa; border-left: 4px solid <%= getRebootTypeColor(reboot.type) %>;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span><%= getRebootTypeIcon(reboot.type) %></span>
+                                    <strong style="color: <%= getRebootTypeColor(reboot.type) %>">
+                                        <%= reboot.reason %>
+                                    </strong>
+                                </div>
+                                <div style="font-size: 0.85em; color: #6c757d;">
+                                    📅 <%= new Date(reboot.timestamp).toLocaleString('fr-FR') %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 30px; color: #6c757d;">
+                            <span class="emoji">✅</span> Aucun redémarrage récent détecté
+                        </div>
+                    <% } %>
+                </div>
+            </div>
 
-                       <div class="interface-info">
-                           <% if (interfaceStatus[iface].ip) { %>
-                               <div class="info-row">
-                                   <span class="info-label">🌐 Adresse IP</span>
-                                   <span class="info-value"><%= interfaceStatus[iface].ip %></span>
-                               </div>
-                           <% } %>
-                           
-                           <% if (interfaceStatus[iface].ssid) { %>
-                               <div class="info-row">
-                                   <span class="info-label">📡 Réseau Wi-Fi</span>
-                                   <span class="info-value"><%= interfaceStatus[iface].ssid %></span>
-                               </div>
-                           <% } %>
+            <!-- Historique des événements réseau -->
+            <div style="background: white; border-radius: 15px; padding: 30px;">
+                <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
+                    <span class="emoji">📋</span> Événements Réseau
+                </div>
+                
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <% if (connectionHistory.length > 0) { %>
+                        <% for (let i = 0; i < connectionHistory.length; i++) { %>
+                            <% let event = connectionHistory[i]; %>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 6px 0; border-radius: 8px; background: #f8f9fa; border-left: 4px solid <%= event.event === 'UP' ? '#28a745' : '#dc3545' %>;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <strong><%= event.interface.toUpperCase() %></strong>
+                                    <div style="padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; <%= event.event === 'UP' ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
+                                        <%= event.event === 'UP' ? '🟢 CONNECTÉ' : '🔴 DÉCONNECTÉ' %>
+                                    </div>
+                                    <% if (event.internetStatus !== undefined) { %>
+                                        <span style="font-size: 0.8em;">
+                                            Internet: <%= event.internetStatus ? '🌐 OK' : '❌ KO' %>
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <div style="font-size: 0.85em; color: #6c757d;">
+                                    📅 <%= new Date(event.timestamp).toLocaleString('fr-FR') %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 30px; color: #6c757d;">
+                            <span class="emoji">📭</span> Aucun événement réseau enregistré
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
 
-                           <% if (interfaceStatus[iface].signalQuality !== null) { %>
-                               <div class="info-row">
-                                   <span class="info-label">📶 Qualité Signal</span>
-                                   <span class="info-value">
-                                       <strong style="color: <%= getSignalColor(interfaceStatus[iface].signalQuality) %>">
-                                           <%= interfaceStatus[iface].signalQuality %>%
-                                       </strong>
-                                       <div class="signal-bar">
-                                           <div class="signal-fill" style="width: <%= interfaceStatus[iface].signalQuality %>%; background-color: <%= getSignalColor(interfaceStatus[iface].signalQuality) %>"></div>
-                                       </div>
-                                   </span>
-                               </div>
-                           <% } %>
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.5); border-radius: 10px; color: #6c757d;">
+            <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes | 
+            <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Interface UPS détaillée
+            </a> | 
+            <a href="http://192.168.1.200:3001/dashboard" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Dashboard Uptime Kuma
+            </a>
+        </div>
+    </div>
 
-                           <% if (interfaceStatus[iface].signalLevel !== null) { %>
-                               <div class="info-row">
-                                   <span class="info-label">📡 Puissance Signal</span>
-                                   <span class="info-value">
-                                       <strong><%= interfaceStatus[iface].signalLevel %> dBm</strong>
-                                       <small style="color: #6c757d;">
-                                           (<%= interfaceStatus[iface].signalLevel >= -50 ? 'Excellent' : 
-                                                interfaceStatus[iface].signalLevel >= -60 ? 'Très bon' :
-                                                interfaceStatus[iface].signalLevel >= -70 ? 'Bon' :
-                                                interfaceStatus[iface].signalLevel >= -80 ? 'Faible' : 'Très faible' %>)
-                                       </small>
-                                   </span>
-                               </div>
-                           <% } %>
+    <script>
+        function executeBackup() {
+            if (confirm('Lancer une sauvegarde maintenant ?')) {
+                fetch('/admin/backup', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            }
+        }
 
-                           <% if (downtimeStats[iface] && downtimeStats[iface].disconnections) { %>
-                               <div class="info-row">
-                                   <span class="info-label">🔄 Déconnexions</span>
-                                   <span class="info-value"><%= downtimeStats[iface].disconnections %></span>
-                               </div>
-                           <% } %>
+        function controlService(action, service) {
+            if (confirm(`${action.toUpperCase()} le service ${service} ?`)) {
+                fetch(`/admin/service/${action}/${service}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) setTimeout(() => location.reload(), 2000);
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            }
+        }
 
-                           <% if (downtimeStats[iface] && downtimeStats[iface].totalDowntime) { %>
-                               <div class="info-row">
-                                   <span class="info-label">⏱️ Temps hors ligne</span>
-                                   <span class="info-value"><%= formatDuration(downtimeStats[iface].totalDowntime) %></span>
-                               </div>
-                           <% } %>
-                       </div>
-
-                       <% if (vnstatData[iface] && vnstatData[iface].traffic && vnstatData[iface].traffic.day) { %>
-                           <% let dayTraffic = vnstatData[iface].traffic.day[0] || {}; %>
-                           <% let totalTraffic = vnstatData[iface].traffic.total || {}; %>
-                           
-                           <div class="traffic-stats">
-                               <div class="traffic-item">
-                                   <div class="traffic-value">📥 <%= ((dayTraffic.rx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
-                                   <div class="traffic-label">Reçu aujourd'hui</div>
-                               </div>
-                               <div class="traffic-item">
-                                   <div class="traffic-value">📤 <%= ((dayTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
-                                   <div class="traffic-label">Envoyé aujourd'hui</div>
-                               </div>
-                               <div class="traffic-item">
-                                   <div class="traffic-value">📥 <%= ((totalTraffic.rx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
-                                   <div class="traffic-label">Total reçu</div>
-                               </div>
-                               <div class="traffic-item">
-                                   <div class="traffic-value">📤 <%= ((totalTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
-                                   <div class="traffic-label">Total envoyé</div>
-                               </div>
-                           </div>
-                       <% } else { %>
-                           <div style="text-align: center; padding: 20px; background: #fff3cd; border-radius: 10px; color: #856404;">
-                               ⚠️ Aucune donnée vnstat disponible
-                           </div>
-                       <% } %>
-                   </div>
-               <% } %>
-           <% } %>
-       </div>
-
-       <!-- Historiques des événements -->
-       <div class="events-grid">
-           <!-- Historique des redémarrages -->
-           <div class="history-section">
-               <div class="history-header">
-                   <span class="emoji">🔄</span> Historique des Redémarrages
-               </div>
-               
-               <div class="history-list">
-                   <% if (rebootHistory && rebootHistory.length > 0) { %>
-                       <% for (let i = 0; i < rebootHistory.length; i++) { %>
-                           <% let reboot = rebootHistory[i]; %>
-                           <div class="history-item reboot-item <%= reboot.type %>">
-                               <div class="event-info">
-                                   <span><%= getRebootTypeIcon(reboot.type) %></span>
-                                   <strong style="color: <%= getRebootTypeColor(reboot.type) %>">
-                                       <%= reboot.reason %>
-                                   </strong>
-                               </div>
-                               <div class="event-time">
-                                   📅 <%= new Date(reboot.timestamp).toLocaleString('fr-FR') %>
-                               </div>
-                           </div>
-                       <% } %>
-                   <% } else { %>
-                       <div style="text-align: center; padding: 30px; color: #6c757d;">
-                           <span class="emoji">✅</span> Aucun redémarrage récent détecté
-                       </div>
-                   <% } %>
-               </div>
-           </div>
-
-           <!-- Historique des événements réseau -->
-           <div class="history-section">
-               <div class="history-header">
-                   <span class="emoji">📋</span> Événements Réseau
-               </div>
-               
-               <div class="history-list">
-                   <% if (connectionHistory.length > 0) { %>
-                       <% for (let i = 0; i < connectionHistory.length; i++) { %>
-                           <% let event = connectionHistory[i]; %>
-                           <div class="history-item <%= event.event.toLowerCase() %>">
-                               <div class="event-info">
-                                   <strong><%= event.interface.toUpperCase() %></strong>
-                                   <div class="event-status <%= event.event.toLowerCase() %>">
-                                       <%= event.event === 'UP' ? '🟢 CONNECTÉ' : '🔴 DÉCONNECTÉ' %>
-                                   </div>
-                                   <% if (event.internetStatus !== undefined) { %>
-                                       <span style="font-size: 0.8em;">
-                                           Internet: <%= event.internetStatus ? '🌐 OK' : '❌ KO' %>
-                                       </span>
-                                   <% } %>
-                               </div>
-                               <div class="event-time">
-                                   📅 <%= new Date(event.timestamp).toLocaleString('fr-FR') %>
-                               </div>
-                           </div>
-                       <% } %>
-                   <% } else { %>
-                       <div style="text-align: center; padding: 30px; color: #6c757d;">
-                           <span class="emoji">📭</span> Aucun événement réseau enregistré
-                       </div>
-                   <% } %>
-               </div>
-           </div>
-       </div>
-
-       <div class="footer">
-           <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes | 
-           <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
-               🔗 Interface UPS détaillée
-           </a> | 
-           <a href="http://192.168.1.200:3001/dashboard" target="_blank" style="color: #667eea; text-decoration: none;">
-               🔗 Dashboard Uptime Kuma
-           </a>
-       </div>
-   </div>
-
-   <script>
-       function executeBackup() {
-           if (confirm('Lancer une sauvegarde maintenant ?')) {
-               fetch('/admin/backup', { method: 'POST' })
-               .then(response => response.json())
-               .then(data => {
-                   alert(data.message);
-                   if (data.success) location.reload();
-               })
-               .catch(error => {
-                   alert('Erreur: ' + error.message);
-               });
-           }
-       }
-
-       function controlService(action, service) {
-           if (confirm(`${action.toUpperCase()} le service ${service} ?`)) {
-               fetch(`/admin/service/${action}/${service}`, { method: 'POST' })
-               .then(response => response.json())
-               .then(data => {
-                   alert(data.message);
-                   if (data.success) setTimeout(() => location.reload(), 2000);
-               })
-               .catch(error => {
-                   alert('Erreur: ' + error.message);
-               });
-           }
-       }
-
-       function confirmReboot() {
-           const confirmation = prompt('ATTENTION: Redémarrage du système!\n\nTapez "REBOOT" pour confirmer:');
-           if (confirmation === 'REBOOT') {
-               fetch('/admin/reboot', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ confirm: 'REBOOT' })
-               })
-               .then(response => response.json())
-               .then(data => {
-                   alert(data.message);
-                   if (data.success) {
-                       alert('Le système va redémarrer dans 3 secondes...');
-                   }
-               })
-               .catch(error => {
-                   alert('Erreur: ' + error.message);
-               });
-           } else if (confirmation !== null) {
-               alert('Confirmation incorrecte. Redémarrage annulé.');
-           }
-       }
-
-       function toggleUptimeKumaPreview() {
-           const preview = document.getElementById('uptime-kuma-preview');
-           if (preview.style.display === 'none') {
-               preview.style.display = 'block';
-           } else {
-               preview.style.display = 'none';
-           }
-       }
-
-       // Notification d'état
-       function showNotification(message, type = 'info') {
-           const notification = document.createElement('div');
-           notification.style.cssText = `
-               position: fixed;
-               top: 20px;
-               right: 20px;
-               padding: 15px 20px;
-               background: ${type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : '#3498db'};
-               color: white;
-               border-radius: 8px;
-               font-weight: bold;
-               z-index: 1000;
-               box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-           `;
-           notification.textContent = message;
-           document.body.appendChild(notification);
-           
-           setTimeout(() => {
-               notification.remove();
-           }, 5000);
-       }
-   </script>
+        function confirmReboot() {
+            const confirmation = prompt('ATTENTION: Redémarrage du système!\n\nTapez "REBOOT" pour confirmer:');
+            if (confirmation === 'REBOOT') {
+                fetch('/admin/reboot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ confirm: 'REBOOT' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        alert('Le système va redémarrer dans 3 secondes...');
+                    }
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            } else if (confirmation !== null) {
+                alert('Confirmation incorrecte. Redémarrage annulé.');
+            }
+        }
+    </script>
 </body>
 </html>
