@@ -116,14 +116,14 @@
     <a href="http://192.168.1.200:3000" class="main-dashboard-btn">🏠 Dashboard Principal</a>
     
     <div class="header">
-        <h1>📹 Surveillance Caméras Tapo</h1>
-        <p>Monitoring en temps réel - 9 caméras - <%= new Date().toLocaleString('fr-FR') %></p>
+        <h1>📹 Surveillance Caméras</h1>
+        <p>Monitoring en temps réel - 12 caméras - <%= new Date().toLocaleString('fr-FR') %></p>
     </div>
 
     <div class="stats-bar">
         <strong>📊 Statut Global :</strong> 
         <span id="online-count">-</span> en ligne | 
-        <span id="total-count">9</span> total | 
+        <span id="total-count">12</span> total | 
         <button onclick="testAllCameras()" class="control-btn">🔄 Tester Toutes</button>
     </div>
 
@@ -307,6 +307,66 @@
                 <button onclick="window.open('http://10.0.1.168', '_blank')" class="control-btn">🌐 IP</button>
             </div>
         </div>
+
+        <!-- CamJoowin -->
+        <div class="camera-card">
+            <div class="camera-header">
+                <div class="camera-name">📷 CamJoowin</div>
+                <div class="camera-status status-online">🟢 JOOWIN</div>
+            </div>
+            <div class="camera-stream" style="background: linear-gradient(135deg, #E67E22, #F39C12); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
+                <h3 style="margin-bottom: 15px;">📷 CamJoowin</h3>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.200</p>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📹 Joowin</p>
+                <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
+                <div id="test-result-cam10" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
+            </div>
+            <div class="camera-controls">
+                <a href="https://web.tplinkcloud.com" target="_blank" class="control-btn tapo">📱 Tapo Web</a>
+                <button onclick="testCamera('10.0.1.200', 'cam10')" class="control-btn test">🔄 Test Ping</button>
+                <button onclick="window.open('http://10.0.1.200', '_blank')" class="control-btn">🌐 IP</button>
+            </div>
+        </div>
+
+        <!-- CamSalon -->
+        <div class="camera-card">
+            <div class="camera-header">
+                <div class="camera-name">🛋️ CamSalon</div>
+                <div class="camera-status status-online">🟢 TAPO C200</div>
+            </div>
+            <div class="camera-stream" style="background: linear-gradient(135deg, #9B59B6, #8E44AD); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
+                <h3 style="margin-bottom: 15px;">🛋️ CamSalon</h3>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 192.168.1.44</p>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C200 v2</p>
+                <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: Principal</p>
+                <div id="test-result-cam11" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
+            </div>
+            <div class="camera-controls">
+                <a href="https://web.tplinkcloud.com" target="_blank" class="control-btn tapo">📱 Tapo Web</a>
+                <button onclick="testCamera('192.168.1.44', 'cam11')" class="control-btn test">🔄 Test Ping</button>
+                <button onclick="window.open('http://192.168.1.44', '_blank')" class="control-btn">🌐 IP</button>
+            </div>
+        </div>
+
+        <!-- CamIPC -->
+        <div class="camera-card">
+            <div class="camera-header">
+                <div class="camera-name">🎥 CamIPC</div>
+                <div class="camera-status status-online">🟢 IPC</div>
+            </div>
+            <div class="camera-stream" style="background: linear-gradient(135deg, #1ABC9C, #16A085); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
+                <h3 style="margin-bottom: 15px;">🎥 CamIPC</h3>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.207</p>
+                <p style="margin-bottom: 8px; opacity: 0.9;">📹 Caméra IPC</p>
+                <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
+                <div id="test-result-cam12" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
+            </div>
+            <div class="camera-controls">
+                <a href="https://web.tplinkcloud.com" target="_blank" class="control-btn tapo">📱 Tapo Web</a>
+                <button onclick="testCamera('10.0.1.207', 'cam12')" class="control-btn test">🔄 Test Ping</button>
+                <button onclick="window.open('http://10.0.1.207', '_blank')" class="control-btn">🌐 IP</button>
+            </div>
+        </div>
     </div>
 
     <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
@@ -321,7 +381,6 @@
             resultDiv.innerHTML = '🔄 Test en cours...';
             resultDiv.style.color = '#f39c12';
             
-            // Utiliser notre serveur Python pour le ping REEL
             fetch(`http://192.168.1.200:5000/ping/${ip}`)
                 .then(response => {
                     if (!response.ok) {
@@ -347,7 +406,6 @@
         }
 
         function testAllCameras() {
-            // Utiliser l'API ping-all pour tester toutes les caméras d'un coup
             fetch('http://192.168.1.200:5000/ping-all')
                 .then(response => response.json())
                 .then(data => {
@@ -368,12 +426,10 @@
                         }
                     });
                     
-                    // Mettre à jour le compteur
                     document.getElementById('online-count').textContent = onlineCount;
                 })
                 .catch(error => {
                     console.error('Erreur ping-all:', error);
-                    // En cas d'erreur, tester individuellement
                     const cameras = [
                         {ip: '10.0.1.161', id: 'cam1'},
                         {ip: '10.0.1.162', id: 'cam2'},
@@ -383,7 +439,10 @@
                         {ip: '10.0.1.165', id: 'cam6'},
                         {ip: '10.0.1.166', id: 'cam7'},
                         {ip: '10.0.1.167', id: 'cam8'},
-                        {ip: '10.0.1.168', id: 'cam9'}
+                        {ip: '10.0.1.168', id: 'cam9'},
+                        {ip: '10.0.1.200', id: 'cam10'},
+                        {ip: '192.168.1.44', id: 'cam11'},
+                        {ip: '10.0.1.207', id: 'cam12'}
                     ];
                     
                     cameras.forEach(camera => {
@@ -392,7 +451,6 @@
                 });
         }
 
-        // Test automatique au chargement
         window.addEventListener('load', () => {
             setTimeout(testAllCameras, 2000);
         });

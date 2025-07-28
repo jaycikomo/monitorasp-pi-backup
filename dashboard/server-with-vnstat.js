@@ -676,6 +676,11 @@ app.get('/cameras', (req, res) => {
     res.render('cameras');
 });
 
+// Route pour Smart Life
+app.get('/smartlife', (req, res) => {
+    res.render('smartlife');
+});
+
 app.listen(port, () => {
     console.log(`Dashboard avec monitoring sur http://192.168.1.200:${port}`);
 });
