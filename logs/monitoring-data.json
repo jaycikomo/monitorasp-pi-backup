@@ -4775,6 +4775,252 @@
       "interface": "wlan1",
       "event": "UP",
       "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:30:03.380Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:30:13.381Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:30:13.381Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:30:23.390Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:43:48.914Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:48:18.528Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:48:18.528Z",
+      "interface": "docker0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:48:28.529Z",
+      "interface": "docker0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:48:28.529Z",
+      "interface": "vethc89d0bf",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:50:08.557Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T10:50:18.561Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:20:13.056Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:20:23.057Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:30:03.374Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:30:13.382Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:30:13.382Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:30:23.391Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:40:03.681Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:40:13.691Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:50:04.023Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:50:14.030Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:50:14.030Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T11:50:24.037Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:00:04.340Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:00:14.349Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:10:04.699Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:10:14.701Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:20:05.067Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:20:15.077Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:30:05.258Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:30:15.265Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:40:11.829Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:40:21.837Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:47:01.107Z",
+      "interface": "docker0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:47:11.586Z",
+      "interface": "docker0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:47:11.586Z",
+      "interface": "veth662d9c0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:51:52.485Z",
+      "interface": "docker0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:52:04.638Z",
+      "interface": "docker0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:52:04.638Z",
+      "interface": "vethdd6396f",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:52:22.835Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-29T12:52:32.841Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
     }
   ],
   "interfaceStates": {
@@ -4845,23 +5091,30 @@
     "vethf1d8ea7": true,
     "vetha86dff3": false,
     "veth60a7d70": true,
-    "veth40f9616": true
+    "veth40f9616": true,
+    "vethb44a4fd": false,
+    "vethc89d0bf": true,
+    "veth0b429a9": false,
+    "veth662d9c0": true,
+    "veth7baac65": false,
+    "vethdd6396f": true,
+    "veth0e595e6": true
   },
   "downtimeStats": {
     "wlan0": {
-      "totalDowntime": 2281070,
-      "disconnections": 199,
-      "lastDownDuration": 10002
+      "totalDowntime": 2371128,
+      "disconnections": 208,
+      "lastDownDuration": 10007
     },
     "wlan1": {
-      "totalDowntime": 23342381,
-      "disconnections": 152,
-      "lastDownDuration": 10000
+      "totalDowntime": 23672035,
+      "disconnections": 159,
+      "lastDownDuration": 10006
     },
     "docker0": {
-      "totalDowntime": 362326,
-      "disconnections": 31,
-      "lastDownDuration": 10002
+      "totalDowntime": 394959,
+      "disconnections": 34,
+      "lastDownDuration": 12153
     },
     "eth0": {
       "totalDowntime": 120086,
