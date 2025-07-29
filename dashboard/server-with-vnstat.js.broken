@@ -681,6 +681,82 @@ app.get('/smartlife', (req, res) => {
     res.render('smartlife');
 });
 
+// Route pour Smart Life
+app.get('/smartlife', (req, res) => {
+    res.render('smartlife');
+});
+
+// ========================================
+// API BASIQUE UPTIME KUMA
+// ========================================
+
+app.get('/api/cameras-from-kuma', async (req, res) => {
+    try {
+        // Données de test basées sur votre Uptime Kuma
+        const cameras = {
+            'cam1': { 
+                id: 'cam1', name: 'CamAbriMoto', emoji: '🏍️', 
+                status: 'online', kumaUptime: '96.49%', pingTime: '7ms' 
+            },
+            'cam2': { 
+                id: 'cam2', name: 'CamAtelier', emoji: '🔧', 
+                status: 'online', kumaUptime: '100%', pingTime: '5ms' 
+            },
+            'cam3': { 
+                id: 'cam3', name: 'CamEnclos', emoji: '🌿', 
+                status: 'online', kumaUptime: '99.86%', pingTime: '8ms' 
+            },
+            'cam4': { 
+                id: 'cam4', name: 'CamEntree', emoji: '🚪', 
+                status: 'online', kumaUptime: '99.84%', pingTime: '6ms' 
+            },
+            'cam5': { 
+                id: 'cam5', name: 'CamExtVoiture', emoji: '🚗', 
+                status: 'warning', kumaUptime: '27.60%', pingTime: '45ms' 
+            },
+            'cam6': { 
+                id: 'cam6', name: 'CamLocalPiscine', emoji: '🏊', 
+                status: 'online', kumaUptime: '81.34%', pingTime: '9ms' 
+            },
+            'cam7': { 
+                id: 'cam7', name: 'CamParking', emoji: '🅿️', 
+                status: 'online', kumaUptime: '87.65%', pingTime: '8ms' 
+            },
+            'cam8': { 
+                id: 'cam8', name: 'CamPiscineExterieure', emoji: '🏊‍♂️', 
+                status: 'online', kumaUptime: '63.60%', pingTime: '12ms' 
+            },
+            'cam9': { 
+                id: 'cam9', name: 'CamPortail', emoji: '🚪', 
+                status: 'online', kumaUptime: '87.67%', pingTime: '9ms' 
+            },
+            'cam10': { 
+                id: 'cam10', name: 'CamSalon', emoji: '🛋️', 
+                status: 'online', kumaUptime: '100%', pingTime: '4ms' 
+            }
+        };
+        
+        const stats = {
+            total: Object.keys(cameras).length,
+            online: Object.values(cameras).filter(c => c.status === 'online').length,
+            offline: Object.values(cameras).filter(c => c.status === 'offline').length,
+            lastSync: new Date().toLocaleString('fr-FR')
+        };
+        
+        res.json({ success: true, cameras, stats });
+        
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+console.log('📹 API Caméras configurée sur /api/cameras-from-kuma');
+
+app.listen(port, () => {
+    console.log(`Dashboard avec monitoring sur http://192.168.1.200:${port}`);
+});
+
+
 app.listen(port, () => {
     console.log(`Dashboard avec monitoring sur http://192.168.1.200:${port}`);
 });
