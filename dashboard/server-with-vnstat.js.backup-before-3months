@@ -322,7 +322,7 @@ function getRebootHistory() {
         const reboots = [];
         
         // 1. Récupérer les anciens redémarrages via 'last reboot'
-        exec('last reboot | head -100', (error, stdout) => {
+        exec('last reboot | head -20', (error, stdout) => {
             if (!error && stdout) {
                 const lines = stdout.split('\n');
                 lines.forEach(line => {
@@ -349,16 +349,17 @@ function getRebootHistory() {
             }
             
             // 2. Ajouter les boots récents via journalctl
-            exec('journalctl --list-boots --no-pager | head -10', (error2, bootStdout) => {
+            exec('journalctl --list-boots --no-pager | head -5', (error2, bootStdout) => {
                 if (!error2 && bootStdout) {
                     const bootLines = bootStdout.split('\n');
                     bootLines.forEach(bootLine => {
-                        if (bootLine.trim() && bootLine.includes('202')) {
+                        if (bootLine.trim() && bootLine.includes('202')) { // Ligne avec date
                             const dateMatch = bootLine.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
                             if (dateMatch) {
                                 const bootDate = new Date(dateMatch[1]);
+                                // Ajouter seulement si pas déjà dans la liste 'last reboot'
                                 const exists = reboots.some(r => 
-                                    Math.abs(new Date(r.timestamp) - bootDate) < 3600000
+                                    Math.abs(new Date(r.timestamp) - bootDate) < 3600000 // 1 heure de différence
                                 );
                                 if (!exists) {
                                     reboots.push({
@@ -373,87 +374,9 @@ function getRebootHistory() {
                     });
                 }
                 
-                // 3. Ajouter les événements de redémarrage depuis syslog
-                exec('sudo grep -h "reboot\\|shutdown\\|restart\\|watchdog" /var/log/syslog* 2>/dev/null | grep "2025" | tail -50', (error3, syslogStdout) => {
-                    if (!error3 && syslogStdout) {
-                        const syslogLines = syslogStdout.split('\n');
-                        syslogLines.forEach(line => {
-                            if ((line.includes('reboot') || line.includes('shutdown') || line.includes('watchdog')) && line.trim()) {
-                                const dateMatch = line.match(/(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})/);
-                                if (dateMatch) {
-                                    try {
-                                        const eventDate = new Date(new Date().getFullYear() + ' ' + dateMatch[1]);
-                                        const exists = reboots.some(r => 
-                                            Math.abs(new Date(r.timestamp) - eventDate) < 600000 // 10 minutes
-                                        );
-                                        if (!exists && !isNaN(eventDate.getTime())) {
-                                            let reason = 'Redémarrage système';
-                                            let type = 'system';
-                                            
-                                            if (line.includes('watchdog')) {
-                                                reason = 'Redémarrage watchdog matériel';
-                                                type = 'watchdog-hardware';
-                                            } else if (line.includes('shutdown')) {
-                                                reason = 'Arrêt système';
-                                                type = 'shutdown';
-                                            } else if (line.includes('systemctl restart')) {
-                                                reason = 'Redémarrage service';
-                                                type = 'service-restart';
-                                            }
-                                            
-                                            reboots.push({
-                                                timestamp: eventDate.toISOString(),
-                                                date: eventDate,
-                                                type: type,
-                                                reason: reason
-                                            });
-                                        }
-                                    } catch (e) {
-                                        // Ignorer les erreurs de parsing
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    
-                    // 4. Ajouter les logs watchdog spécifiques s'ils existent
-                    exec('test -f /var/log/watchdog-protection.log && tail -50 /var/log/watchdog-protection.log || echo "no_watchdog"', (error4, watchdogStdout) => {
-                        if (!error4 && watchdogStdout && !watchdogStdout.includes('no_watchdog')) {
-                            const watchdogLines = watchdogStdout.split('\n');
-                            watchdogLines.forEach(line => {
-                                if (line.includes('Redémarrage détecté') || line.includes('watchdog')) {
-                                    const timeMatch = line.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
-                                    if (timeMatch) {
-                                        const watchdogDate = new Date(timeMatch[1]);
-                                        const exists = reboots.some(r => 
-                                            Math.abs(new Date(r.timestamp) - watchdogDate) < 600000
-                                        );
-                                        if (!exists) {
-                                            reboots.push({
-                                                timestamp: watchdogDate.toISOString(),
-                                                date: watchdogDate,
-                                                type: 'watchdog-hardware',
-                                                reason: 'Redémarrage watchdog matériel'
-                                            });
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                        
-                        // Filtrer les redémarrages des 3 derniers mois
-                        const threeMonthsAgo = new Date();
-                        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-                        
-                        const recentReboots = reboots.filter(reboot => 
-                            new Date(reboot.timestamp) > threeMonthsAgo
-                        );
-                        
-                        // Trier par date décroissante
-                        recentReboots.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                        resolve(recentReboots);
-                    });
-                });
+                // Trier par date décroissante et limiter
+                reboots.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                resolve(reboots.slice(0, 15));
             });
         });
     });
