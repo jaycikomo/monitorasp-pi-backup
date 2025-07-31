@@ -146,8 +146,8 @@
                 <span class="stat-label">📋 Événements Réseau</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number"><%= rebootHistory.length %></span>
-                <span class="stat-label">🔄 Redémarrages</span>
+		<span class="stat-number"><%= rebootHistory.filter(r => new Date(r.timestamp).toDateString() === new Date().toDateString()).length %></span>
+		<span class="stat-label">🔄 Redémarrages (Aujourd'hui)</span>
             </div>
             <div class="stat-card">
                 <span class="stat-number" id="kuma-total-display">--</span>

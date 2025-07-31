@@ -1,18 +1,6 @@
 {
   "connectionHistory": [
     {
-      "timestamp": "2025-07-26T20:40:15.851Z",
-      "interface": "wlan0",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-26T20:50:06.244Z",
-      "interface": "wlan0",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
       "timestamp": "2025-07-26T20:50:16.248Z",
       "interface": "wlan0",
       "event": "UP",
@@ -5999,6 +5987,18 @@
       "interface": "wlan0",
       "event": "UP",
       "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-31T09:00:11.540Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-07-31T09:00:21.543Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
     }
   ],
   "interfaceStates": {
@@ -6099,9 +6099,9 @@
       "lastDownDuration": 10007
     },
     "wlan1": {
-      "totalDowntime": 24328847,
-      "disconnections": 197,
-      "lastDownDuration": 20006
+      "totalDowntime": 24338850,
+      "disconnections": 198,
+      "lastDownDuration": 10003
     },
     "docker0": {
       "totalDowntime": 465162,
