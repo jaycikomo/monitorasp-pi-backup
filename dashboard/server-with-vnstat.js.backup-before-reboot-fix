@@ -316,68 +316,90 @@ function getUpsData() {
 }
 
 // Récupérer l'historique des redémarrages
-
 function getRebootHistory() {
     return new Promise((resolve) => {
-        const reboots = [];
-        
-        // 1. Récupérer les anciens redémarrages via 'last reboot'
         exec('last reboot | head -20', (error, stdout) => {
-            if (!error && stdout) {
-                const lines = stdout.split('\n');
-                lines.forEach(line => {
-                    if (line.includes('reboot') && line.trim()) {
-                        const match = line.match(/reboot\s+system boot\s+[\d\.\-\w]+\s+(.+?)(?:\s+still running|\s+\()/);
-                        if (match) {
-                            const dateStr = match[1].trim();
-                            try {
-                                const rebootDate = new Date(dateStr + ' 2025');
-                                if (!isNaN(rebootDate.getTime())) {
-                                    reboots.push({
-                                        timestamp: rebootDate.toISOString(),
-                                        date: rebootDate,
-                                        type: 'system',
-                                        reason: 'Redémarrage système'
-                                    });
-                                }
-                            } catch (e) {
-                                console.log('Erreur parsing date reboot:', e.message);
+            if (error) {
+                resolve([]);
+                return;
+            }
+
+            const reboots = [];
+            const lines = stdout.split('\n');
+            
+            lines.forEach(line => {
+                if (line.includes('reboot') && line.trim()) {
+                    const match = line.match(/reboot\s+system boot\s+[\d\.\-\w]+\s+(.+?)(?:\s+still running|\s+\()/);
+                    if (match) {
+                        const dateStr = match[1].trim();
+                        try {
+                            const rebootDate = new Date(dateStr + ' 2025');
+                            if (!isNaN(rebootDate.getTime())) {
+                                reboots.push({
+                                    timestamp: rebootDate.toISOString(),
+                                    date: rebootDate,
+                                    type: 'system',
+                                    reason: 'Redémarrage système'
+                                });
                             }
+                        } catch (e) {
+                            console.log('Erreur parsing date reboot:', e.message);
                         }
                     }
-                });
-            }
-            
-            // 2. Ajouter les boots récents via journalctl
-            exec('journalctl --list-boots --no-pager | head -5', (error2, bootStdout) => {
-                if (!error2 && bootStdout) {
-                    const bootLines = bootStdout.split('\n');
-                    bootLines.forEach(bootLine => {
-                        if (bootLine.trim() && bootLine.includes('202')) { // Ligne avec date
-                            const dateMatch = bootLine.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
-                            if (dateMatch) {
-                                const bootDate = new Date(dateMatch[1]);
-                                // Ajouter seulement si pas déjà dans la liste 'last reboot'
-                                const exists = reboots.some(r => 
-                                    Math.abs(new Date(r.timestamp) - bootDate) < 3600000 // 1 heure de différence
-                                );
-                                if (!exists) {
-                                    reboots.push({
-                                        timestamp: bootDate.toISOString(),
-                                        date: bootDate,
-                                        type: 'system',
-                                        reason: 'Redémarrage système (récent)'
-                                    });
-                                }
+                }
+            });
+
+            try {
+                if (fs.existsSync('/var/log/interface-watchdog.log')) {
+                    const watchdogLogs = fs.readFileSync('/var/log/interface-watchdog.log', 'utf8');
+                    const watchdogLines = watchdogLogs.split('\n');
+                    
+                    watchdogLines.forEach(line => {
+                        if (line.includes('REDÉMARRAGE') && line.includes('INITIÉ')) {
+                            const timeMatch = line.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+                            const interfaceMatch = line.match(/interface (\w+)/);
+                            
+                            if (timeMatch && interfaceMatch) {
+                                reboots.push({
+                                    timestamp: new Date(timeMatch[1]).toISOString(),
+                                    date: new Date(timeMatch[1]),
+                                    type: 'watchdog-network',
+                                    reason: `Watchdog réseau - Interface ${interfaceMatch[1]} DOWN`
+                                });
                             }
                         }
                     });
                 }
-                
-                // Trier par date décroissante et limiter
-                reboots.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                resolve(reboots.slice(0, 15));
-            });
+            } catch (e) {
+                console.log('Erreur lecture logs watchdog:', e.message);
+            }
+
+            try {
+                if (fs.existsSync('/var/log/watchdog-protection.log')) {
+                    const hwWatchdogLogs = fs.readFileSync('/var/log/watchdog-protection.log', 'utf8');
+                    const hwLines = hwWatchdogLogs.split('\n');
+                    
+                    hwLines.forEach(line => {
+                        if (line.includes('Redémarrage détecté par watchdog matériel')) {
+                            const timeMatch = line.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+                            
+                            if (timeMatch) {
+                                reboots.push({
+                                    timestamp: new Date(timeMatch[1]).toISOString(),
+                                    date: new Date(timeMatch[1]),
+                                    type: 'watchdog-hardware',
+                                    reason: 'Watchdog matériel - Plantage système détecté'
+                                });
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('Erreur lecture logs watchdog matériel:', e.message);
+            }
+
+            reboots.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            resolve(reboots.slice(0, 15));
         });
     });
 }
