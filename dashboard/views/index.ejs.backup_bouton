@@ -170,7 +170,7 @@
                 <button onclick="testNetwork()" class="admin-btn" style="flex: 1;">
                     <span>🔄</span> Test Rapide
                 </button>
-                <a href="/network-advanced" class="admin-btn" style="flex: 1; text-align: center;">
+                <a href="/network" class="admin-btn" style="flex: 1; text-align: center;">
                     <span>📋</span> Détails
                 </a>
             </div>
