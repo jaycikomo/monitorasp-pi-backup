@@ -175,6 +175,14 @@
                 </a>
             </div>
         </div>
+
+                .catch(error => {
+                    console.error('❌ Network test failed:', error);
+                });
+        }
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
             </div>
         </div>
 
@@ -784,29 +792,52 @@
                 alert('Confirmation incorrecte. Redémarrage annulé.');
             }
         }
+    </script>
+
+</body>
+        // ========================================
+        // FONCTION TEST RÉSEAU SIMPLE ET PROPRE
+        // ========================================
         // ========================================
         // INITIALISATION AU CHARGEMENT
         // ========================================
+        
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Page chargée, initialisation...');
+            
+            // Test immédiat au chargement pour avoir des données fraîches
+            console.log("⚡ Test immédiat au chargement...");
             testNetwork();
+            
+            // Test automatique après 2 secondes
             setTimeout(function() {
                 console.log('⏰ Lancement du test automatique...');
                 testNetwork();
             }, 2000);
+            
+            // Auto-refresh toutes les 60 secondes
             setInterval(function() {
                 console.log('🔄 Refresh automatique...');
                 testNetwork();
             }, 60000);
         });
         
+        // ========================================
+        // FONCTION DE DEBUG (pour développement)
+        // ========================================
+        
         function debugNetwork() {
             console.log('🔍 Debug réseau...');
+            console.log('Éléments HTML:', {
+                online: document.getElementById('net-online'),
+                accessible: document.getElementById('net-accessible'),
+                offline: document.getElementById('net-offline')
+            });
+            
             fetch('/api/network-minimal')
                 .then(response => response.json())
                 .then(data => console.log('🔍 Données API:', data))
                 .catch(error => console.error('🔍 Erreur API:', error));
         }
-    </script>
-</body>
+        
 </html>

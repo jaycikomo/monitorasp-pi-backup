@@ -175,6 +175,14 @@
                 </a>
             </div>
         </div>
+
+                .catch(error => {
+                    console.error('❌ Network test failed:', error);
+                });
+        }
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
             </div>
         </div>
 
@@ -474,13 +482,20 @@
             offlineEl.textContent = '...';
             
             // Appel API
-            fetch('/api/network-minimal')
-                .then(function(response) {
-                    if (!response.ok) throw new Error('HTTP ' + response.status);
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log('✅ Données reçues pour bouton:', data.summary);
+            fetch("/api/network-minimal")
+              .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+              })
+              .then(data => {
+                console.log("✅ Données reçues :", data);
+                document.getElementById("net-online").textContent = data.online;
+                document.getElementById("net-accessible").textContent = data.accessible;
+                document.getElementById("net-offline").textContent = data.offline;
+              })
+              .catch(error => {
+                console.error("❌ Network test failed:", error);
+              });
                     
                     // Mettre à jour les statuts individuels des équipements
                     if (data.details && data.details.length > 0) {
@@ -716,33 +731,6 @@
         }
 
         // Démarrer automatiquement quand la page est chargée
-        document.addEventListener('DOMContentLoaded', () => {
-            // Attendre 2 secondes pour que la page soit bien chargée
-            setTimeout(startKumaMonitoring, 2000);
-        });
-
-        // Arrêter le monitoring quand on quitte la page
-        window.addEventListener('beforeunload', stopKumaMonitoring);
-
-        // Gestion de la visibilité de la page (pause quand l'onglet n'est pas actif)
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopKumaMonitoring();
-            } else {
-                startKumaMonitoring();
-            }
-        });
-
-        // Fonctions existantes du dashboard
-        function executeBackup() {
-            if (confirm('Lancer une sauvegarde maintenant ?')) {
-                fetch('/admin/backup', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    if (data.success) location.reload();
-                })
-                .catch(error => {
                     alert('Erreur: ' + error.message);
                 });
             }
@@ -759,54 +747,49 @@
                 .catch(error => {
                     alert('Erreur: ' + error.message);
                 });
-            }
-        }
+<div style="text-align:center; margin-top: 20px;">
+  <button onclick="debugNetwork()" style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 1em; cursor: pointer;">
+    🔍 Test Réseau (Debug)
+  </button>
+</div>
 
-        function confirmReboot() {
-            const confirmation = prompt('ATTENTION: Redémarrage du système!\n\nTapez "REBOOT" pour confirmer:');
-            if (confirmation === 'REBOOT') {
-                fetch('/admin/reboot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ confirm: 'REBOOT' })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                    if (data.success) {
-                        alert('Le système va redémarrer dans 3 secondes...');
-                    }
-                })
-                .catch(error => {
-                    alert('Erreur: ' + error.message);
-                });
-            } else if (confirmation !== null) {
-                alert('Confirmation incorrecte. Redémarrage annulé.');
-            }
-        }
-        // ========================================
-        // INITIALISATION AU CHARGEMENT
-        // ========================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Page chargée, initialisation...');
-            testNetwork();
-            setTimeout(function() {
-                console.log('⏰ Lancement du test automatique...');
-                testNetwork();
-            }, 2000);
-            setInterval(function() {
-                console.log('🔄 Refresh automatique...');
-                testNetwork();
-            }, 60000);
-        });
-        
-        function debugNetwork() {
-            console.log('🔍 Debug réseau...');
-            fetch('/api/network-minimal')
-                .then(response => response.json())
-                .then(data => console.log('🔍 Données API:', data))
-                .catch(error => console.error('🔍 Erreur API:', error));
-        }
-    </script>
+<script>
+function debugNetwork() {
+  console.log("🔍 Debug réseau...");
+  console.log("Éléments HTML:", {
+    online: document.getElementById("net-online"),
+    accessible: document.getElementById("net-accessible"),
+    offline: document.getElementById("net-offline")
+  });
+  fetch("/api/network-minimal")
+    .then(response => response.json())
+    .then(data => console.log("📡 Données API:", data))
+    .catch(error => console.error("❌ Erreur API:", error));
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🚀 Page chargée, initialisation...");
+  testNetwork();
+  setTimeout(() => {
+    console.log("⏰ Lancement du test automatique...");
+    testNetwork();
+  }, 2000);
+  setInterval(() => {
+    console.log("🔄 Refresh automatique...");
+    testNetwork();
+  }, 60000);
+  setTimeout(startKumaMonitoring, 2000);
+});
+
+window.addEventListener("beforeunload", stopKumaMonitoring);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopKumaMonitoring();
+  } else {
+    startKumaMonitoring();
+  }
+});
+</script>
 </body>
 </html>

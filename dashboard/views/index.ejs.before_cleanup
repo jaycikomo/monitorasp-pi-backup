@@ -175,6 +175,14 @@
                 </a>
             </div>
         </div>
+
+                .catch(error => {
+                    console.error('❌ Network test failed:', error);
+                });
+        }
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
             </div>
         </div>
 
