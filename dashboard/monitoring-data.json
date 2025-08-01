@@ -1,48 +1,6 @@
 {
   "connectionHistory": [
     {
-      "timestamp": "2025-07-27T21:00:28.665Z",
-      "interface": "wlan1",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:00:28.665Z",
-      "interface": "docker0",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:00:40.272Z",
-      "interface": "docker0",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:00:40.272Z",
-      "interface": "veth2037061",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:20:01.867Z",
-      "interface": "wlan0",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:20:11.877Z",
-      "interface": "wlan0",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-27T21:20:11.877Z",
-      "interface": "wlan1",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
       "timestamp": "2025-07-27T21:20:21.880Z",
       "interface": "wlan1",
       "event": "UP",
@@ -5999,6 +5957,48 @@
       "interface": "wlan1",
       "event": "UP",
       "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:20:12.117Z",
+      "interface": "wlan1",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:21:43.071Z",
+      "interface": "wlan1",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:21:43.071Z",
+      "interface": "docker0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:21:53.072Z",
+      "interface": "docker0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:21:53.072Z",
+      "interface": "vethb1df785",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:30:06.080Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-01T21:30:16.141Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
     }
   ],
   "interfaceStates": {
@@ -6111,23 +6111,25 @@
     "veth67110d6": true,
     "vethe0ef9de": true,
     "veth9efab74": false,
-    "vethfe2c42c": true
+    "vethfe2c42c": true,
+    "veth372bfba": false,
+    "vethb1df785": true
   },
   "downtimeStats": {
     "wlan0": {
-      "totalDowntime": 4121953,
-      "disconnections": 376,
-      "lastDownDuration": 10011
+      "totalDowntime": 4132014,
+      "disconnections": 377,
+      "lastDownDuration": 10061
     },
     "wlan1": {
-      "totalDowntime": 25276384,
-      "disconnections": 246,
-      "lastDownDuration": 10004
+      "totalDowntime": 25367338,
+      "disconnections": 247,
+      "lastDownDuration": 90954
     },
     "docker0": {
-      "totalDowntime": 556700,
-      "disconnections": 50,
-      "lastDownDuration": 10003
+      "totalDowntime": 566701,
+      "disconnections": 51,
+      "lastDownDuration": 10001
     },
     "eth0": {
       "totalDowntime": 398373,

@@ -212,28 +212,57 @@
 
         <!-- Section Uptime Kuma AUTOMATIQUE -->
         <div class="uptime-kuma-section">
-            <!-- Section Uptime Kuma Simplifiée -->
             <div class="uptime-header">
                 <div class="uptime-title">
-                    <span class="emoji">📊</span>
-                    Surveillance Uptime Kuma
+                    <span class="emoji">📹</span>
+                    Surveillance Uptime Kuma (Auto)
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <a href="http://192.168.1.200:3001/dashboard" target="_blank" class="admin-btn" style="text-decoration: none; font-size: 1em; padding: 12px 24px; background: #28a745; color: white; border-radius: 8px;">
-                        🔗 Ouvrir Dashboard Kuma
+                    <span id="kuma-service-status" class="status-indicator status-warning">
+                        🔄 Synchronisation...
+                    </span>
+                    <a href="http://192.168.1.200:3001/dashboard" target="_blank" class="admin-btn" style="text-decoration: none; font-size: 0.9em; padding: 8px 16px;">
+                        🔗 Ouvrir Dashboard
                     </a>
+                    <button onclick="refreshKumaData()" id="kuma-refresh-btn" class="admin-btn" style="font-size: 0.9em; padding: 8px 16px;">🔄 Actualiser</button>
                 </div>
             </div>
 
-            <div style="background: #e8f5e8; border: 2px solid #28a745; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0;">
-                <div style="font-size: 1.2em; color: #155724; margin-bottom: 10px;">
-                    🎯 Monitoring Complet Disponible
+            <!-- Statistiques automatiques -->
+            <div class="uptime-stats">
+                <div class="uptime-metric" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <span class="uptime-metric-value" style="color: #155724;" id="kuma-up-count">--</span>
+                    <div class="uptime-metric-label" style="color: #155724;">🟢 Services UP</div>
                 </div>
-                <div style="color: #155724; margin-bottom: 15px;">
-                    Accédez au dashboard Uptime Kuma pour voir tous vos monitors<br>
-                    <small>25 monitors • Caméras • Réseau • Domotique</small>
+
+                <div class="uptime-metric" style="background: #f8d7da; border-left: 4px solid #dc3545;">
+                    <span class="uptime-metric-value" style="color: #721c24;" id="kuma-down-count">--</span>
+                    <div class="uptime-metric-label" style="color: #721c24;">🔴 Services DOWN</div>
+                </div>
+
+                <div class="uptime-metric" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <span class="uptime-metric-value" style="color: #856404;" id="kuma-warning-count">--</span>
+                    <div class="uptime-metric-label" style="color: #856404;">⚠️ Warning</div>
+                </div>
+
+                <div class="uptime-metric" style="background: #d1ecf1; border-left: 4px solid #17a2b8;">
+                    <span class="uptime-metric-value" style="color: #0c5460;" id="kuma-total-count">--</span>
+                    <div class="uptime-metric-label" style="color: #0c5460;">📊 Total Monitors</div>
                 </div>
             </div>
+
+            <!-- Grille des monitors automatique -->
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Monitors en Temps Réel</h4>
+                
+                <div id="kuma-monitors-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">🔄 Chargement des monitors...</div>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <small id="kuma-sync-info" style="color: #6c757d;">
+                        🔗 En attente de synchronisation...
+                    </small>
                 </div>
             </div>
         </div>
