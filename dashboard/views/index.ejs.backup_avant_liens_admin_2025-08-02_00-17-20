@@ -176,51 +176,6 @@
             </div>
         </div>
 
-        <!-- Section Administration Réseau -->
-        <div class="admin-section" style="background: linear-gradient(135deg, #6c757d, #495057); margin-bottom: 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: white; margin: 0;">
-                    <span class="emoji">🔧</span> Administration Réseau
-                </h3>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
-                <!-- Free -->
-                <a href="http://192.168.1.254" target="_blank" style="text-decoration: none;">
-                    <div style="background: linear-gradient(135deg, #00a8e6 0%, #0056b3 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size: 2em; margin-bottom: 10px;">🌐</div>
-                        <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">Freebox</div>
-                        <div style="font-size: 0.9em; opacity: 0.9;">192.168.1.254</div>
-                        <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">Interface Admin</div>
-                    </div>
-                </a>
-
-                <!-- Cisco -->
-                <a href="http://10.0.1.251" target="_blank" style="text-decoration: none;">
-                    <div style="background: linear-gradient(135deg, #1ba1e2 0%, #0078d4 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size: 2em; margin-bottom: 10px;">🏢</div>
-                        <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">Cisco RV132W</div>
-                        <div style="font-size: 0.9em; opacity: 0.9;">10.0.1.251</div>
-                        <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">Configuration</div>
-                    </div>
-                </a>
-
-                <!-- TP-Link -->
-                <a href="http://10.0.1.200" target="_blank" style="text-decoration: none;">
-                    <div style="background: linear-gradient(135deg, #00a651 0%, #007a3d 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                        <div style="font-size: 2em; margin-bottom: 10px;">📶</div>
-                        <div style="font-size: 1.2em; font-weight: bold; margin-bottom: 5px;">TP-Link TL-WR841N</div>
-                        <div style="font-size: 0.9em; opacity: 0.9;">10.0.1.200</div>
-                        <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">Routeur WiFi</div>
-                    </div>
-                </a>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-top: 10px; text-align: center; color: white; font-size: 0.9em;">
-                💡 Cliquez sur une carte pour accéder à l'interface d'administration
-            </div>
-        </div>
-
                 <small style="color: rgba(255,255,255,0.8);">
                     Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
                 </small>
