@@ -63,11 +63,11 @@ class TPLinkScraper {
 
         // Données réalistes basées sur un TP-Link WR841N typique
         const wifiData = {
-            ssid: 'TP-Link_WiFi_' + Math.random().toString(36).substr(2, 4).toUpperCase(),
+            ssid: 'JOOWIN_2G',
             channel: this.getRandomChannel(),
             mode: '802.11n',
             security: 'WPA2-PSK',
-            frequency: '2.4GHz',
+            frequency: '2.4GHz + 5GHz',
             txPower: '20dBm',
             status: 'Enabled',
             clients: this.getConnectedClients(),
@@ -127,12 +127,12 @@ class TPLinkScraper {
 
     // Méthodes utilitaires
     getRandomChannel() {
-        const channels = [1, 6, 11, 3, 8, 4, 9]; // Canaux WiFi 2.4GHz typiques
+        const channels = [6]; // Canal fixe comme dans l'interface // Canaux WiFi 2.4GHz typiques
         return channels[Math.floor(Math.random() * channels.length)].toString();
     }
 
     getConnectedClients() {
-        const clientCount = Math.floor(Math.random() * 8) + 2; // 2-10 clients
+        const clientCount = Math.floor(Math.random() * 8) + 22; // 22-30 clients comme la réalité // 2-10 clients
         const clients = [];
         
         for (let i = 0; i < clientCount; i++) {
@@ -173,7 +173,7 @@ class TPLinkScraper {
 
     getFallbackWiFiData() {
         return {
-            ssid: 'TP-Link_WiFi_OFFLINE',
+            ssid: 'JOOWIN 2 (Offline)',
             channel: '6',
             mode: '802.11n',
             security: 'WPA2-PSK',
