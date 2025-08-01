@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Réseau & Administration</title>
+    <meta http-equiv="refresh" content="60">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1600px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 3px solid #667eea; }
+        .header h1 { font-size: 2.5em; color: #2c3e50; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; color: #7f8c8d; }
+        .admin-panel { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; }
+        .admin-title { font-size: 1.8em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .admin-section { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        .admin-section h3 { margin-bottom: 15px; color: #ecf0f1; }
+        .status-indicator { padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; display: inline-block; transition: all 0.2s ease; }
+        .status-success { background: #27ae60; color: white; }
+        .status-warning { background: #f39c12; color: white; }
+        .status-error { background: #e74c3c; color: white; }
+        .admin-btn { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 5px; text-decoration: none; display: inline-block; }
+        .admin-btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .admin-btn:disabled { background: #6c757d; cursor: not-allowed; transform: none; }
+        .admin-btn.danger { background: #e74c3c; font-size: 1.1em; padding: 15px 30px; }
+        .admin-btn.warning { background: #f39c12; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .service-card { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; }
+        .service-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .service-name { font-weight: bold; color: #ecf0f1; }
+        .service-controls { display: flex; gap: 8px; }
+        .service-controls .admin-btn { font-size: 0.8em; padding: 6px 12px; }
+        .system-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .system-card { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; text-align: center; }
+        .system-card strong { display: block; margin-bottom: 8px; color: #ecf0f1; }
+        .reboot-section { text-align: center; border-top: 2px solid rgba(255,255,255,0.3); padding-top: 20px; margin-top: 20px; }
+        .stats-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+        .uptime-kuma-section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid #1976d2; }
+        .uptime-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .uptime-title { font-size: 1.8em; color: #2c3e50; display: flex; align-items: center; gap: 10px; }
+        .uptime-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .uptime-metric { padding: 20px; border-radius: 10px; text-align: center; }
+        .uptime-metric-value { font-size: 2em; font-weight: bold; display: block; }
+        .uptime-metric-label { font-size: 0.9em; margin-top: 5px; }
+        .emoji { font-size: 1.2em; margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="emoji">🌐</span>Dashboard Réseau & Administration</h1>
+            <p>Raspberry Pi <%= serverIP %> | <%= new Date().toLocaleString('fr-FR') %></p>
+        </div>
+
+        <!-- Panel d'Administration -->
+        <div class="admin-panel">
+            <div class="admin-title">
+                <span class="emoji">🔧</span>Panel d'Administration
+            </div>
+
+            <!-- Statut du Backup -->
+            <div class="admin-section">
+                <h3>☁️ Backup GitHub</h3>
+                <div class="backup-info">
+                    <span class="status-indicator status-<%= backupStatus.status %>">
+                        <%= backupStatus.status === 'success' ? '✅ OK' :
+                            backupStatus.status === 'warning' ? '⚠️ Ancien' : '❌ Erreur' %>
+                    </span>
+                    <span>Dernier backup: <%= backupStatus.lastBackup %></span>
+                    <% if (backupStatus.hoursAgo !== undefined) { %>
+                        <span style="color: #bdc3c7;">(il y a <%= backupStatus.hoursAgo %>h)</span>
+                    <% } %>
+                    <button class="admin-btn" onclick="executeBackup()">🚀 Lancer Backup</button>
+                </div>
+            </div>
+
+            <!-- Contrôles Services -->
+            <div class="admin-section">
+                <h3>⚙️ Services Système</h3>
+                <div class="services-grid">
+                    <% servicesStatus.forEach(service => { %>
+                        <div class="service-card">
+                            <div class="service-header">
+                                <span class="service-name"><%= service.name %></span>
+                                <span class="status-indicator <%= service.active ? 'status-success' : 'status-error' %>">
+                                    <%= service.active ? '🟢 Actif' : '🔴 Arrêté' %>
+                                </span>
+                            </div>
+                            <div class="service-controls">
+                                <button class="admin-btn" onclick="controlService('start', '<%= service.name %>')">▶️ Start</button>
+                                <button class="admin-btn warning" onclick="controlService('stop', '<%= service.name %>')">⏸️ Stop</button>
+                                <button class="admin-btn" onclick="controlService('restart', '<%= service.name %>')">🔄 Restart</button>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+
+            <!-- Informations Système -->
+            <div class="admin-section">
+                <h3>💻 Informations Système</h3>
+                <div class="system-info">
+                    <div class="system-card">
+                        <strong>⏱️ Uptime</strong>
+                        <%= systemInfo.uptime %>
+                    </div>
+                    <div class="system-card">
+                        <strong>🌡️ Température</strong>
+                        <%= systemInfo.temperature %>
+                    </div>
+                    <div class="system-card">
+                        <strong>⚡ Throttling</strong>
+                        <%= systemInfo.throttled === 'throttled=0x0' ? '✅ OK' : '⚠️ ' + systemInfo.throttled %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton Reboot -->
+            <div class="reboot-section">
+                <button class="admin-btn danger" onclick="confirmReboot()">
+                    🔄 REDÉMARRER LE SYSTÈME
+                </button>
+            </div>
+        </div>
+
+        <!-- Widget Infrastructure Réseau - Version Simple -->
+        <div class="admin-section" style="background: linear-gradient(135deg, #17a2b8, #20c997); margin-bottom: 30px;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: white; margin: 0;">
+                    <span class="emoji">🌐</span> Infrastructure Réseau
+                </h3>
+                <span class="status-indicator status-success" style="margin-left: auto;">
+                    Auto-refresh
+                </span>
+            </div>
+            
+            <div class="system-info" style="margin-bottom: 20px;">
+                <div class="system-card">
+                    <strong style="color: #28a745;">🟢 En Ligne</strong>
+                    <span style="font-size: 1.5em; color: #28a745;" id="net-online">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #17a2b8;">🔗 Accessible</strong>
+                    <span style="font-size: 1.5em; color: #17a2b8;" id="net-accessible">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #dc3545;">🔴 Hors Ligne</strong>
+                    <span style="font-size: 1.5em; color: #dc3545;" id="net-offline">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #6c757d;">📊 Total</strong>
+                    <span style="font-size: 1.5em; color: #ecf0f1;">4</span>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                <div style="text-align: center; color: #ecf0f1;" id="device-list">
+                    📡 <span id="tp-name">TP-Link</span>: <span id="tp-status">En ligne</span><br>
+                    🔀 <span id="cisco-name">Cisco</span>: <span id="cisco-status">En ligne</span><br>
+                    📶 <span id="freebox-name">Freebox</span>: <span id="freebox-status">En ligne</span><br>
+                    🖥️ <span id="rep-name">Répéteur</span>: <span id="rep-status">En ligne</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="testNetwork()" class="admin-btn" style="flex: 1;">
+                    <span>🔄</span> Test Rapide
+                </button>
+                <a href="/network-advanced" class="admin-btn" style="flex: 1; text-align: center;">
+                    <span>📋</span> Détails
+                </a>
+            </div>
+        </div>
+
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <span class="stat-number"><%= connections.established %></span>
+                <span class="stat-label">🟢 Connexions Établies</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number"><%= connections.listening %></span>
+                <span class="stat-label">👂 En Écoute</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number"><%= connections.total %></span>
+                <span class="stat-label">📊 Total Connexions</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number"><%= connectionHistory.length %></span>
+                <span class="stat-label">📋 Événements Réseau</span>
+            </div>
+            <div class="stat-card">
+		<span class="stat-number"><%= rebootHistory.filter(r => new Date(r.timestamp).toDateString() === new Date().toDateString()).length %></span>
+		<span class="stat-label">🔄 Redémarrages (Aujourd'hui)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="kuma-total-display">--</span>
+                <span class="stat-label">📹 Monitors Surveillance</span>
+            </div>
+        </div>
+
+        <!-- Section Uptime Kuma AUTOMATIQUE -->
+        <div class="uptime-kuma-section">
+            <div class="uptime-header">
+                <div class="uptime-title">
+                    <span class="emoji">📹</span>
+                    Surveillance Uptime Kuma (Auto)
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span id="kuma-service-status" class="status-indicator status-warning">
+                        🔄 Synchronisation...
+                    </span>
+                    <a href="http://192.168.1.200:3001/dashboard" target="_blank" class="admin-btn" style="text-decoration: none; font-size: 0.9em; padding: 8px 16px;">
+                        🔗 Ouvrir Dashboard
+                    </a>
+                    <button onclick="refreshKumaData()" id="kuma-refresh-btn" class="admin-btn" style="font-size: 0.9em; padding: 8px 16px;">🔄 Actualiser</button>
+                </div>
+            </div>
+
+            <!-- Statistiques automatiques -->
+            <div class="uptime-stats">
+                <div class="uptime-metric" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <span class="uptime-metric-value" style="color: #155724;" id="kuma-up-count">--</span>
+                    <div class="uptime-metric-label" style="color: #155724;">🟢 Services UP</div>
+                </div>
+
+                <div class="uptime-metric" style="background: #f8d7da; border-left: 4px solid #dc3545;">
+                    <span class="uptime-metric-value" style="color: #721c24;" id="kuma-down-count">--</span>
+                    <div class="uptime-metric-label" style="color: #721c24;">🔴 Services DOWN</div>
+                </div>
+
+                <div class="uptime-metric" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <span class="uptime-metric-value" style="color: #856404;" id="kuma-warning-count">--</span>
+                    <div class="uptime-metric-label" style="color: #856404;">⚠️ Warning</div>
+                </div>
+
+                <div class="uptime-metric" style="background: #d1ecf1; border-left: 4px solid #17a2b8;">
+                    <span class="uptime-metric-value" style="color: #0c5460;" id="kuma-total-count">--</span>
+                    <div class="uptime-metric-label" style="color: #0c5460;">📊 Total Monitors</div>
+                </div>
+            </div>
+
+            <!-- Grille des monitors automatique -->
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Monitors en Temps Réel</h4>
+                
+                <div id="kuma-monitors-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">🔄 Chargement des monitors...</div>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <small id="kuma-sync-info" style="color: #6c757d;">
+                        🔗 En attente de synchronisation...
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section UPS/Onduleur -->
+        <% if (upsData.available) { %>
+            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid #ffc107;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="font-size: 1.8em; color: #2c3e50; display: flex; align-items: center; gap: 10px;">
+                        <span class="emoji">⚡</span>
+                        Onduleur <%= upsData.manufacturer || 'EATON' %> <%= upsData.model || 'Ellipse ECO 650' %>
+                    </div>
+                    <div style="padding: 10px 20px; border-radius: 25px; font-weight: bold; font-size: 0.9em; background-color: <%= getUpsStatusColor(upsData.status) %>; color: white;">
+                        <%= getUpsStatusText(upsData.status) %>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>; display: block;">
+                            <%= upsData.batteryCharge || 'N/A' %>%
+                        </span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">🔋 Charge Batterie</div>
+                        <% if (upsData.batteryCharge) { %>
+                            <div style="width: 100%; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin: 10px 0;">
+                                <div style="height: 100%; border-radius: 10px; transition: width 0.3s ease; width: <%= upsData.batteryCharge %>%; background-color: <%= upsData.batteryCharge >= 50 ? '#28a745' : upsData.batteryCharge >= 20 ? '#ffc107' : '#dc3545' %>"></div>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: #495057; display: block;"><%= formatUpsRuntime(upsData.batteryRuntime) %></span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">⏱️ Autonomie Restante</div>
+                    </div>
+
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                        <span style="font-size: 2em; font-weight: bold; color: #495057; display: block;"><%= upsData.load || 'N/A' %>%</span>
+                        <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">📊 Charge Actuelle</div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Interfaces -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 40px;">
+            <% for (let i = 0; i < availableInterfaces.length; i++) { %>
+                <% let iface = availableInterfaces[i]; %>
+                <% if (interfaceStatus[iface]) { %>
+                    <div style="background: white; border-radius: 15px; padding: 25px; border-left: 6px solid <%= interfaceStatus[iface].up ? '#28a745' : '#dc3545' %>;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="font-size: 1.5em; font-weight: bold; color: #2c3e50;">
+                                <span class="emoji">
+                                    <%= iface === 'eth0' ? '🔌' : iface.indexOf('wlan') >= 0 ? '📶' : iface.indexOf('docker') >= 0 ? '🐳' : '🔗' %>
+                                </span>
+                                <%= iface.toUpperCase() %>
+                            </div>
+                            <div style="padding: 8px 16px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; <%= interfaceStatus[iface].up ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
+                                <%= interfaceStatus[iface].up ? 'UP' : 'DOWN' %>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <% if (interfaceStatus[iface].ip) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">🌐 Adresse IP</span>
+                                    <span style="color: #667eea; font-weight: 500;"><%= interfaceStatus[iface].ip %></span>
+                                </div>
+                            <% } %>
+
+                            <% if (interfaceStatus[iface].ssid) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">📡 Réseau Wi-Fi</span>
+                                    <span style="color: #667eea; font-weight: 500;"><%= interfaceStatus[iface].ssid %></span>
+                                </div>
+                            <% } %>
+
+                            <% if (interfaceStatus[iface].signalQuality !== null) { %>
+                                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                                    <span style="font-weight: 600; color: #495057;">📶 Qualité Signal</span>
+                                    <span style="color: #667eea; font-weight: 500;">
+                                        <strong style="color: <%= getSignalColor(interfaceStatus[iface].signalQuality) %>">
+                                            <%= interfaceStatus[iface].signalQuality %>%
+                                        </strong>
+                                    </span>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <% if (vnstatData[iface] && vnstatData[iface].traffic && vnstatData[iface].traffic.day) { %>
+                            <% let dayTraffic = vnstatData[iface].traffic.day[0] || {}; %>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 1.4em; font-weight: bold; color: #495057;">📥 <%= ((dayTraffic.rx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
+                                    <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">Reçu aujourd'hui</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; text-align: center;">
+                                    <div style="font-size: 1.4em; font-weight: bold; color: #495057;">📤 <%= ((dayTraffic.tx || 0) / (1024*1024*1024)).toFixed(2) %> GB</div>
+                                    <div style="font-size: 0.9em; color: #6c757d; margin-top: 5px;">Envoyé aujourd'hui</div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } %>
+        </div>
+
+        <!-- Historiques des événements -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px;">
+            <!-- Historique des redémarrages -->
+            <div style="background: white; border-radius: 15px; padding: 30px;">
+                <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
+                    <span class="emoji">🔄</span> Historique des Redémarrages
+                </div>
+
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <% if (rebootHistory && rebootHistory.length > 0) { %>
+                        <% for (let i = 0; i < rebootHistory.length; i++) { %>
+                            <% let reboot = rebootHistory[i]; %>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 6px 0; border-radius: 8px; background: #f8f9fa; border-left: 4px solid <%= getRebootTypeColor(reboot.type) %>;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span><%= getRebootTypeIcon(reboot.type) %></span>
+                                    <strong style="color: <%= getRebootTypeColor(reboot.type) %>">
+                                        <%= reboot.reason %>
+                                    </strong>
+                                </div>
+                                <div style="font-size: 0.85em; color: #6c757d;">
+                                    📅 <%= new Date(reboot.timestamp).toLocaleString('fr-FR') %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 30px; color: #6c757d;">
+                            <span class="emoji">✅</span> Aucun redémarrage récent détecté
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Historique des événements réseau -->
+            <div style="background: white; border-radius: 15px; padding: 30px;">
+                <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
+                    <span class="emoji">📋</span> Événements Réseau
+                </div>
+
+                <div style="max-height: 350px; overflow-y: auto;">
+                    <% if (connectionHistory.length > 0) { %>
+                        <% for (let i = 0; i < connectionHistory.length; i++) { %>
+                            <% let event = connectionHistory[i]; %>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin: 6px 0; border-radius: 8px; background: #f8f9fa; border-left: 4px solid <%= event.event === 'UP' ? '#28a745' : '#dc3545' %>;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <strong><%= event.interface.toUpperCase() %></strong>
+                                    <div style="padding: 4px 10px; border-radius: 12px; font-size: 0.75em; font-weight: bold; <%= event.event === 'UP' ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;' %>">
+                                        <%= event.event === 'UP' ? '🟢 CONNECTÉ' : '🔴 DÉCONNECTÉ' %>
+                                    </div>
+                                    <% if (event.internetStatus !== undefined) { %>
+                                        <span style="font-size: 0.8em;">
+                                            Internet: <%= event.internetStatus ? '🌐 OK' : '❌ KO' %>
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <div style="font-size: 0.85em; color: #6c757d;">
+                                    📅 <%= new Date(event.timestamp).toLocaleString('fr-FR') %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div style="text-align: center; padding: 30px; color: #6c757d;">
+                            <span class="emoji">📭</span> Aucun événement réseau enregistré
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.5); border-radius: 10px; color: #6c757d;">
+            <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes |
+            <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Interface UPS détaillée
+            </a> |
+            <a href="http://192.168.1.200:3001/dashboard" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Dashboard Uptime Kuma
+            </a> |
+            <a href="http://192.168.1.200:3000/cameras" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Dashboard Caméras
+            </a>
+            <a href="/smartlife" class="grid-item external-link">
+                <div class="item-icon">🏠</div>
+                <div class="item-title">Smart Life</div>
+                <div class="item-subtitle">Domotique</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+
+        // Fonction Test Réseau pour le bouton
+        function testNetwork() {
+            console.log('🔄 Test réseau manuel lancé...');
+            
+            // Éléments à mettre à jour
+            const onlineEl = document.getElementById('net-online');
+            const accessibleEl = document.getElementById('net-accessible');
+            const offlineEl = document.getElementById('net-offline');
+            
+            if (!onlineEl || !accessibleEl || !offlineEl) {
+                console.error('❌ Éléments HTML introuvables');
+                return;
+            }
+            
+            // Indicateur de chargement
+            onlineEl.textContent = '...';
+            accessibleEl.textContent = '...';
+            offlineEl.textContent = '...';
+            
+            // Appel API
+            fetch('/api/network-minimal')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('✅ Données reçues pour bouton:', data.summary);
+                    
+                    // Mettre à jour les statuts individuels des équipements
+                    if (data.details && data.details.length > 0) {
+                        data.details.forEach(function(device) {
+                            let statusEl, nameEl;
+                            if (device.ip === "10.0.1.200") {
+                                statusEl = document.getElementById("tp-status");
+                                nameEl = document.getElementById("tp-name");
+                            } else if (device.ip === "10.0.1.251") {
+                                statusEl = document.getElementById("cisco-status");
+                                nameEl = document.getElementById("cisco-name");
+                            } else if (device.ip === "192.168.1.254") {
+                                statusEl = document.getElementById("freebox-status");
+                                nameEl = document.getElementById("freebox-name");
+                            } else if (device.ip === "192.168.1.177") {
+                                statusEl = document.getElementById("rep-status");
+                                nameEl = document.getElementById("rep-name");
+                            }
+                            
+                            if (statusEl && nameEl) {
+                                const status = device.status === "online" ? 
+                                    "En ligne (" + device.responseTime + "ms)" : "Hors ligne";
+                                statusEl.textContent = status;
+                                statusEl.style.color = device.status === "online" ? "#28a745" : "#dc3545";
+                            }
+                        });
+                    }
+                    
+                    // Mettre à jour les statuts individuels des équipements
+                    if (data.details && data.details.length > 0) {
+                        data.details.forEach(function(device) {
+                            let statusEl, nameEl;
+                            if (device.ip === "10.0.1.200") {
+                                statusEl = document.getElementById("tp-status");
+                                nameEl = document.getElementById("tp-name");
+                            } else if (device.ip === "10.0.1.251") {
+                                statusEl = document.getElementById("cisco-status");
+                                nameEl = document.getElementById("cisco-name");
+                            } else if (device.ip === "192.168.1.254") {
+                                statusEl = document.getElementById("freebox-status");
+                                nameEl = document.getElementById("freebox-name");
+                            } else if (device.ip === "192.168.1.177") {
+                                statusEl = document.getElementById("rep-status");
+                                nameEl = document.getElementById("rep-name");
+                            }
+                            
+                            if (statusEl && nameEl) {
+                                const status = device.status === "online" ? 
+                                    "En ligne (" + device.responseTime + "ms)" : "Hors ligne";
+                                statusEl.textContent = status;
+                                statusEl.style.color = device.status === "online" ? "#28a745" : "#dc3545";
+                            }
+                        });
+                    }
+                    
+                    if (data && data.summary) {
+                        onlineEl.textContent = data.summary.online;
+                        accessibleEl.textContent = data.summary.accessible;
+                        offlineEl.textContent = data.summary.offline;
+                        
+                        // Animation de confirmation
+                        [onlineEl, accessibleEl, offlineEl].forEach(function(el) {
+                            el.style.backgroundColor = '#4CAF5030';
+                            setTimeout(function() { el.style.backgroundColor = ''; }, 800);
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('❌ Erreur test manuel:', error);
+                    onlineEl.textContent = '!';
+                    accessibleEl.textContent = '!';
+                    offlineEl.textContent = '!';
+                });
+        }
+        // Variables globales pour le monitoring Uptime Kuma
+        let kumaRefreshInterval;
+        let kumaData = {};
+
+        // Fonction pour charger les données Uptime Kuma
+        async function loadKumaData() {
+            try {
+                document.getElementById('kuma-service-status').innerHTML = '🔄 Synchronisation...';
+                document.getElementById('kuma-service-status').className = 'status-indicator status-warning';
+                
+                const response = await fetch('/api/cameras-from-kuma');
+                const data = await response.json();
+                
+                if (data.success) {
+                    kumaData = data;
+                    updateKumaDisplay(data);
+                    
+                    document.getElementById('kuma-service-status').innerHTML = '✅ Connecté';
+                    document.getElementById('kuma-service-status').className = 'status-indicator status-success';
+                } else {
+                    throw new Error('API returned error');
+                }
+                
+            } catch (error) {
+                console.error('Erreur chargement Uptime Kuma:', error);
+                document.getElementById('kuma-service-status').innerHTML = '❌ Erreur API';
+                document.getElementById('kuma-service-status').className = 'status-indicator status-error';
+                
+                // Afficher une erreur dans la grille
+                document.getElementById('kuma-monitors-grid').innerHTML = 
+                    '<div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8d7da; border-radius: 8px; color: #721c24;">' +
+                    '❌ Impossible de charger les données Uptime Kuma<br><small>Vérifiez que l\'API fonctionne</small></div>';
+            }
+        }
+
+        // Fonction pour mettre à jour l'affichage
+        function updateKumaDisplay(data) {
+            const { cameras, stats } = data;
+            
+            // Mettre à jour les statistiques
+            document.getElementById('kuma-up-count').textContent = stats.online;
+            document.getElementById('kuma-down-count').textContent = stats.offline;
+            document.getElementById('kuma-warning-count').textContent = stats.warning;
+            document.getElementById('kuma-total-count').textContent = stats.total;
+            
+            // Mettre à jour aussi le stat-card principal
+            const totalDisplay = document.getElementById('kuma-total-display');
+            if (totalDisplay) {
+                totalDisplay.textContent = stats.total;
+            }
+            
+            // Générer la grille des monitors
+            const monitorsGrid = document.getElementById('kuma-monitors-grid');
+            monitorsGrid.innerHTML = '';
+            
+            Object.values(cameras).forEach(camera => {
+                const monitorCard = createMonitorCard(camera);
+                monitorsGrid.appendChild(monitorCard);
+            });
+            
+            // Mettre à jour l'info de synchronisation
+            document.getElementById('kuma-sync-info').innerHTML = 
+                `🔗 Dernière sync: ${stats.lastSync} • ${stats.message}`;
+        }
+
+        // Fonction pour créer une carte de monitor
+        function createMonitorCard(camera) {
+            const card = document.createElement('div');
+            
+            // Déterminer la couleur selon le statut
+            let bgColor, textColor, statusIcon;
+            switch(camera.status) {
+                case 'online':
+                    bgColor = '#d4edda';
+                    textColor = '#155724';
+                    statusIcon = '🟢';
+                    break;
+                case 'offline':
+                    bgColor = '#f8d7da';
+                    textColor = '#721c24';
+                    statusIcon = '🔴';
+                    break;
+                case 'warning':
+                    bgColor = '#fff3cd';
+                    textColor = '#856404';
+                    statusIcon = '⚠️';
+                    break;
+                default:
+                    bgColor = '#e2e3e5';
+                    textColor = '#383d41';
+                    statusIcon = '❓';
+            }
+            
+            card.style.cssText = `
+                background: ${bgColor};
+                border-radius: 8px;
+                padding: 12px;
+                text-align: center;
+                transition: transform 0.2s ease;
+                cursor: pointer;
+                border: 1px solid ${bgColor === '#fff3cd' ? '#ffc107' : bgColor === '#f8d7da' ? '#dc3545' : '#28a745'};
+            `;
+            
+            card.innerHTML = `
+                <div style="font-size: 1.2em; margin-bottom: 5px;">
+                    ${camera.emoji} ${statusIcon}
+                </div>
+                <div style="font-weight: bold; color: ${textColor}; font-size: 0.9em; margin-bottom: 3px;">
+                    ${camera.name}
+                </div>
+                <div style="font-size: 0.8em; color: ${textColor}; opacity: 0.8;">
+                    Uptime: ${camera.kumaUptime}
+                </div>
+                ${camera.pingTime ? `<div style="font-size: 0.75em; color: ${textColor}; opacity: 0.7; margin-top: 2px;">Ping: ${camera.pingTime}</div>` : ''}
+            `;
+            
+            // Effet hover
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+            });
+            
+            return card;
+        }
+
+        // Fonction pour rafraîchir manuellement
+        function refreshKumaData() {
+            const btn = document.getElementById('kuma-refresh-btn');
+            btn.innerHTML = '🔄 Actualisation...';
+            btn.disabled = true;
+            
+            loadKumaData().finally(() => {
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 Actualiser';
+                    btn.disabled = false;
+                }, 1000);
+            });
+        }
+
+        // Fonction pour démarrer le monitoring automatique
+        function startKumaMonitoring() {
+            // Chargement initial
+            loadKumaData();
+            
+            // Actualisation automatique toutes les 30 secondes
+            kumaRefreshInterval = setInterval(loadKumaData, 30000);
+        }
+
+        // Fonction pour arrêter le monitoring
+        function stopKumaMonitoring() {
+            if (kumaRefreshInterval) {
+                clearInterval(kumaRefreshInterval);
+            }
+        }
+
+        // Démarrer automatiquement quand la page est chargée
+        document.addEventListener('DOMContentLoaded', () => {
+            // Attendre 2 secondes pour que la page soit bien chargée
+            setTimeout(startKumaMonitoring, 2000);
+        });
+
+        // Arrêter le monitoring quand on quitte la page
+        window.addEventListener('beforeunload', stopKumaMonitoring);
+
+        // Gestion de la visibilité de la page (pause quand l'onglet n'est pas actif)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopKumaMonitoring();
+            } else {
+                startKumaMonitoring();
+            }
+        });
+
+        // Fonctions existantes du dashboard
+        function executeBackup() {
+            if (confirm('Lancer une sauvegarde maintenant ?')) {
+                fetch('/admin/backup', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            }
+        }
+
+        function controlService(action, service) {
+            if (confirm(`${action.toUpperCase()} le service ${service} ?`)) {
+                fetch(`/admin/service/${action}/${service}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) setTimeout(() => location.reload(), 2000);
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            }
+        }
+
+        function confirmReboot() {
+            const confirmation = prompt('ATTENTION: Redémarrage du système!\n\nTapez "REBOOT" pour confirmer:');
+            if (confirmation === 'REBOOT') {
+                fetch('/admin/reboot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ confirm: 'REBOOT' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        alert('Le système va redémarrer dans 3 secondes...');
+                    }
+                })
+                .catch(error => {
+                    alert('Erreur: ' + error.message);
+                });
+            } else if (confirmation !== null) {
+                alert('Confirmation incorrecte. Redémarrage annulé.');
+            }
+        }
+        // ========================================
+        // INITIALISATION AU CHARGEMENT
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page chargée, initialisation...');
+            testNetwork();
+            setTimeout(function() {
+                console.log('⏰ Lancement du test automatique...');
+                testNetwork();
+            }, 2000);
+            setInterval(function() {
+                console.log('🔄 Refresh automatique...');
+                testNetwork();
+            }, 60000);
+        });
+        
+        function debugNetwork() {
+            console.log('🔍 Debug réseau...');
+            fetch('/api/network-minimal')
+                .then(response => response.json())
+                .then(data => console.log('🔍 Données API:', data))
+                .catch(error => console.error('🔍 Erreur API:', error));
+        }
+    </script>
+</body>
+</html>
