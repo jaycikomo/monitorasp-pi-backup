@@ -1288,83 +1288,55 @@ app.get("/network-test", async (req, res) => {
 });
 });
 
-
-// Nouvelle route réseau avancée avec template
+// Nouvelle route réseau avancée (ajoutée à la fin)
 app.get('/network-advanced', (req, res) => {
     try {
-        console.log('🌐 Page réseau avec template...');
+        console.log('🌐 Page réseau avancée...');
         
-        // Structure exacte pour le template network.ejs
-        const devices = {
-            tplink: {
-                name: "TP-Link TL-WR841N",
-                ip: "10.0.1.200",
-                type: "router", 
-                status: "online",
-                online: true,
-                responseTime: 25,
-                wifi_info: { ssid: "MonReseau_2.4G", channel: "6", mode: "Mixed", bands: ["2.4GHz"] },
-                system_info: { firmware: "TL-WR841N v13", uptime: "15 jours" },
-                network_services: { estimated_clients: 8 },
-                enterprise_features: { vlan_support: "Non", vpn_tunnels: "Non" },
-                protocol: "http"
+        // Données de test simples
+        const testData = {
+            message: "Page réseau avancée ✅",
+            devices: [
+                { 
+                    name: "TP-Link TL-WR841N", 
+                    ip: "10.0.1.200", 
+                    status: "online",
+                    wifi: "MonReseau_2.4G (Canal 6)",
+                    clients: 8
+                },
+                { 
+                    name: "Cisco RV132W", 
+                    ip: "10.0.1.251", 
+                    status: "online",
+                    wifi: "CiscoWiFi_5G (Canal 36)",
+                    clients: 15
+                },
+                { 
+                    name: "Freebox Free", 
+                    ip: "192.168.1.254", 
+                    status: "online",
+                    wifi: "Freebox-XXXXXX (Auto)",
+                    fiber: "FTTH 1Gb/s"
+                },
+                { 
+                    name: "Répéteur Free", 
+                    ip: "192.168.1.177", 
+                    status: "offline",
+                    wifi: "Extension WiFi"
+                }
+            ],
+            network_stats: {
+                total_bandwidth: "1 Gb/s (Fibre)",
+                active_connections: 45,
+                network_load: "18%"
             },
-            cisco: {
-                name: "Cisco RV132W", 
-                ip: "10.0.1.251",
-                type: "router",
-                status: "online",
-                online: true, 
-                responseTime: 12,
-                wifi_info: { ssid: "CiscoWiFi_5G", channel: "36", mode: "AC", bands: ["5GHz"] },
-                system_info: { firmware: "RV132W v1.0", uptime: "45 jours" },
-                network_services: { estimated_clients: 15 },
-                enterprise_features: { vlan_support: "Oui", vpn_tunnels: "2 tunnels" },
-                protocol: "https"
-            },
-            freebox: {
-                name: "Freebox Free",
-                ip: "192.168.1.254", 
-                type: "gateway",
-                status: "online",
-                online: true,
-                responseTime: 3,
-                wifi_info: { ssid: "Freebox-XXXXXX", channel: "Auto", mode: "WiFi 6", bands: ["2.4GHz", "5GHz"] },
-                system_info: { firmware: "Freebox v4.5", uptime: "125 jours" },
-                network_services: { estimated_clients: 12 },
-                enterprise_features: { vlan_support: "Natif", vpn_tunnels: "WireGuard" },
-                protocol: "http"
-            },
-            repeater: {
-                name: "Répéteur Free",
-                ip: "192.168.1.177",
-                type: "repeater", 
-                status: "offline",
-                online: false,
-                responseTime: null,
-                wifi_info: { ssid: "Extension", channel: "Sync", mode: "Répéteur", bands: ["2.4GHz"] },
-                system_info: { firmware: "Répéteur v2.1", uptime: "Indisponible" },
-                network_services: { estimated_clients: 0 },
-                enterprise_features: { vlan_support: "N/A", vpn_tunnels: "N/A" },
-                protocol: "http"
-            }
+            timestamp: new Date().toISOString()
         };
         
-        const stats = {
-            total_devices: 4,
-            online: 3, 
-            offline: 1,
-            average_latency: "13ms"
-        };
-        
-        res.render('network', {
-            devices: devices,
-            stats: stats,
-            lastUpdate: new Date().toLocaleString('fr-FR')
-        });
+        res.json(testData);
         
     } catch (error) {
-        console.error('❌ Erreur template:', error);
+        console.error('❌ Erreur réseau avancée:', error);
         res.status(500).json({ error: error.message });
     }
 });
