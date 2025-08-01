@@ -245,9 +245,7 @@
                         <div class="tech-list">
                             <% if (device.wifi_info) { %>
                                 <% if (device.wifi_info.channel) { %>
-                                    <div class="tech-item">                                    <div class="tech-item">📡 SSID 2.4GHz: <%= device.wifi_info.ssid %></div>
-                                    <div class="tech-item">📡 SSID 5GHz: <%= device.wifi_info.ssid5g || "N/A" %></div>
-                                    📶 Canal WiFi: <%= device.wifi_info.channel %></div>
+                                    <div class="tech-item">📶 Canal WiFi: <%= device.wifi_info.channel %></div>
                                 <% } %>
                                 <% if (device.wifi_info.mode) { %>
                                     <div class="tech-item">📡 Mode: <%= device.wifi_info.mode %></div>
