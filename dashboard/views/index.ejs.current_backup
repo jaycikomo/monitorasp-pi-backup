@@ -170,12 +170,16 @@
                 <button onclick="testNetwork()" class="admin-btn" style="flex: 1;">
                     <span>🔄</span> Test Rapide
                 </button>
-                <a href="/network-advanced" class="admin-btn" style="flex: 1; text-align: center;">
+                <a href="/network" class="admin-btn" style="flex: 1; text-align: center;">
                     <span>📋</span> Détails
                 </a>
             </div>
         </div>
 
+                .catch(error => {
+                    console.error('❌ Network test failed:', error);
+                });
+        }
                 <small style="color: rgba(255,255,255,0.8);">
                     Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
                 </small>
@@ -569,7 +573,7 @@
                 document.getElementById('kuma-service-status').innerHTML = '🔄 Synchronisation...';
                 document.getElementById('kuma-service-status').className = 'status-indicator status-warning';
                 
-                const response = await fetch('/api/uptime-kuma');
+                const response = await fetch('/api/cameras-from-kuma');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -596,19 +600,32 @@
 
         // Fonction pour mettre à jour l'affichage
         function updateKumaDisplay(data) {
-            try {
-                const stats = data.stats || {online: 0, offline: 0, warning: 0, total: 0};
-                document.getElementById("kuma-up-count").textContent = stats.online || "--";
-                document.getElementById("kuma-down-count").textContent = stats.offline || "--";
-                document.getElementById("kuma-warning-count").textContent = stats.warning || "--";
-                document.getElementById("kuma-total-count").textContent = stats.total || "--";
-                const totalDisplay = document.getElementById("kuma-total-display");
-                if (totalDisplay) totalDisplay.textContent = stats.total || "--";
-                const syncInfo = document.getElementById("kuma-sync-info");
-                if (syncInfo) syncInfo.innerHTML = "🔗 Sync: " + new Date().toLocaleTimeString();
-            } catch (e) { 
-                console.log("Erreur updateKuma:", e.message); 
+            const { cameras, stats } = data;
+            
+            // Mettre à jour les statistiques
+            document.getElementById('kuma-up-count').textContent = stats.online;
+            document.getElementById('kuma-down-count').textContent = stats.offline;
+            document.getElementById('kuma-warning-count').textContent = stats.warning;
+            document.getElementById('kuma-total-count').textContent = stats.total;
+            
+            // Mettre à jour aussi le stat-card principal
+            const totalDisplay = document.getElementById('kuma-total-display');
+            if (totalDisplay) {
+                totalDisplay.textContent = stats.total;
             }
+            
+            // Générer la grille des monitors
+            const monitorsGrid = document.getElementById('kuma-monitors-grid');
+            monitorsGrid.innerHTML = '';
+            
+            Object.values(cameras).forEach(camera => {
+                const monitorCard = createMonitorCard(camera);
+                monitorsGrid.appendChild(monitorCard);
+            });
+            
+            // Mettre à jour l'info de synchronisation
+            document.getElementById('kuma-sync-info').innerHTML = 
+                `🔗 Dernière sync: ${stats.lastSync} • ${stats.message}`;
         }
 
         // Fonction pour créer une carte de monitor
@@ -775,30 +792,52 @@
                 alert('Confirmation incorrecte. Redémarrage annulé.');
             }
         }
+    </script>
+
+</body>
+        // ========================================
+        // FONCTION TEST RÉSEAU SIMPLE ET PROPRE
+        // ========================================
         // ========================================
         // INITIALISATION AU CHARGEMENT
         // ========================================
+        
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Page chargée, initialisation...');
-            loadKumaData();
+            
+            // Test immédiat au chargement pour avoir des données fraîches
+            console.log("⚡ Test immédiat au chargement...");
             testNetwork();
+            
+            // Test automatique après 2 secondes
             setTimeout(function() {
                 console.log('⏰ Lancement du test automatique...');
                 testNetwork();
             }, 2000);
+            
+            // Auto-refresh toutes les 60 secondes
             setInterval(function() {
                 console.log('🔄 Refresh automatique...');
                 testNetwork();
             }, 60000);
         });
         
+        // ========================================
+        // FONCTION DE DEBUG (pour développement)
+        // ========================================
+        
         function debugNetwork() {
             console.log('🔍 Debug réseau...');
+            console.log('Éléments HTML:', {
+                online: document.getElementById('net-online'),
+                accessible: document.getElementById('net-accessible'),
+                offline: document.getElementById('net-offline')
+            });
+            
             fetch('/api/network-minimal')
                 .then(response => response.json())
                 .then(data => console.log('🔍 Données API:', data))
                 .catch(error => console.error('🔍 Erreur API:', error));
         }
-    </script>
-</body>
+        
 </html>

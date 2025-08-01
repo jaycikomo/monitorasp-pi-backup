@@ -596,19 +596,32 @@
 
         // Fonction pour mettre à jour l'affichage
         function updateKumaDisplay(data) {
-            try {
-                const stats = data.stats || {online: 0, offline: 0, warning: 0, total: 0};
-                document.getElementById("kuma-up-count").textContent = stats.online || "--";
-                document.getElementById("kuma-down-count").textContent = stats.offline || "--";
-                document.getElementById("kuma-warning-count").textContent = stats.warning || "--";
-                document.getElementById("kuma-total-count").textContent = stats.total || "--";
-                const totalDisplay = document.getElementById("kuma-total-display");
-                if (totalDisplay) totalDisplay.textContent = stats.total || "--";
-                const syncInfo = document.getElementById("kuma-sync-info");
-                if (syncInfo) syncInfo.innerHTML = "🔗 Sync: " + new Date().toLocaleTimeString();
-            } catch (e) { 
-                console.log("Erreur updateKuma:", e.message); 
+            const { cameras, stats } = data;
+            
+            // Mettre à jour les statistiques
+            document.getElementById('kuma-up-count').textContent = stats.online;
+            document.getElementById('kuma-down-count').textContent = stats.offline;
+            document.getElementById('kuma-warning-count').textContent = stats.warning;
+            document.getElementById('kuma-total-count').textContent = stats.total;
+            
+            // Mettre à jour aussi le stat-card principal
+            const totalDisplay = document.getElementById('kuma-total-display');
+            if (totalDisplay) {
+                totalDisplay.textContent = stats.total;
             }
+            
+            // Générer la grille des monitors
+            const monitorsGrid = document.getElementById('kuma-monitors-grid');
+            monitorsGrid.innerHTML = '';
+            
+            Object.values(cameras).forEach(camera => {
+                const monitorCard = createMonitorCard(camera);
+                monitorsGrid.appendChild(monitorCard);
+            });
+            
+            // Mettre à jour l'info de synchronisation
+            document.getElementById('kuma-sync-info').innerHTML = 
+                `🔗 Dernière sync: ${stats.lastSync} • ${stats.message}`;
         }
 
         // Fonction pour créer une carte de monitor
@@ -780,7 +793,6 @@
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Page chargée, initialisation...');
-            loadKumaData();
             testNetwork();
             setTimeout(function() {
                 console.log('⏰ Lancement du test automatique...');

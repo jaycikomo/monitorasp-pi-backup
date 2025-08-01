@@ -1286,9 +1286,6 @@ app.get('/api/uptime-kuma', async (req, res) => {
         exec(`sudo sqlite3 "${dbPath}" "SELECT h.monitor_id, h.status, h.time, m.name FROM heartbeat h JOIN monitor m ON h.monitor_id = m.id WHERE h.time = (SELECT MAX(time) FROM heartbeat h2 WHERE h2.monitor_id = h.monitor_id) ORDER BY m.name;"`, (error, stdout) => {
             let heartbeatList = {};
             let uptimeList = {};
-
-            let onlineCount = 0;
-            let offlineCount = 0;
             
             if (!error && stdout) {
                 const lines = stdout.trim().split('\n');
@@ -1301,21 +1298,12 @@ app.get('/api/uptime-kuma', async (req, res) => {
                             name: name
                         };
                         uptimeList[monitorId] = parseInt(status) === 1 ? '99%+' : '0%';
-
-                        if (parseInt(status) === 1) onlineCount++;
-                        else offlineCount++;
                     }
                 });
             }
             
             res.json({
                 heartbeatList,
-                stats: {
-                    online: onlineCount,
-                    offline: offlineCount,
-                    warning: 0,
-                    total: onlineCount + offlineCount
-                },
                 uptimeList,
                 success: true,
                 timestamp: new Date().toISOString()
