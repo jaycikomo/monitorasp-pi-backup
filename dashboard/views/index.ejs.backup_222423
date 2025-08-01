@@ -569,7 +569,7 @@
                 document.getElementById('kuma-service-status').innerHTML = '🔄 Synchronisation...';
                 document.getElementById('kuma-service-status').className = 'status-indicator status-warning';
                 
-                const response = await fetch('/api/uptime-kuma');
+                const response = await fetch('/api/cameras-from-kuma');
                 const data = await response.json();
                 
                 if (data.success) {

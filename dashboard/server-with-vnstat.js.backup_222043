@@ -830,6 +830,47 @@ app.get('/api/cameras-from-kuma', async (req, res) => {
     }
 });
 
+// API UPTIME KUMA - HEARTBEATS RÉELS
+app.get('/api/uptime-kuma', async (req, res) => {
+    try {
+        const dbPath = '/var/lib/docker/volumes/46be38a5187c0075b16e6c5f4c649b991bc7c9e8687dea77924c0b2bc095ea41/_data/kuma.db';
+        
+        exec(`sudo sqlite3 "${dbPath}" "SELECT h.monitor_id, h.status, h.time, m.name FROM heartbeat h JOIN monitor m ON h.monitor_id = m.id WHERE h.time = (SELECT MAX(time) FROM heartbeat h2 WHERE h2.monitor_id = h.monitor_id) ORDER BY m.name;"`, (error, stdout) => {
+            let heartbeatList = {};
+            let uptimeList = {};
+            
+            if (!error && stdout) {
+                const lines = stdout.trim().split('\n');
+                lines.forEach(line => {
+                    const [monitorId, status, time, name] = line.split('|');
+                    if (monitorId && name) {
+                        heartbeatList[monitorId] = {
+                            status: parseInt(status),
+                            time: time,
+                            name: name
+                        };
+                        uptimeList[monitorId] = parseInt(status) === 1 ? '99%+' : '0%';
+                    }
+                });
+            }
+            
+            res.json({
+                heartbeatList,
+                uptimeList,
+                success: true,
+                timestamp: new Date().toISOString()
+            });
+        });
+    } catch (error) {
+        res.json({
+            heartbeatList: {},
+            uptimeList: {},
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 
 // ========== TEST NETWORK MONITORING - UNE SEULE ROUTE ==========
 const NetworkMonitor = require('./network-monitor');
@@ -1272,47 +1313,6 @@ app.get('/api/komohouse-devices', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
-// API UPTIME KUMA - HEARTBEATS RÉELS
-app.get('/api/uptime-kuma', async (req, res) => {
-    try {
-        const dbPath = '/var/lib/docker/volumes/46be38a5187c0075b16e6c5f4c649b991bc7c9e8687dea77924c0b2bc095ea41/_data/kuma.db';
-        
-        exec(`sudo sqlite3 "${dbPath}" "SELECT h.monitor_id, h.status, h.time, m.name FROM heartbeat h JOIN monitor m ON h.monitor_id = m.id WHERE h.time = (SELECT MAX(time) FROM heartbeat h2 WHERE h2.monitor_id = h.monitor_id) ORDER BY m.name;"`, (error, stdout) => {
-            let heartbeatList = {};
-            let uptimeList = {};
-            
-            if (!error && stdout) {
-                const lines = stdout.trim().split('\n');
-                lines.forEach(line => {
-                    const [monitorId, status, time, name] = line.split('|');
-                    if (monitorId && name) {
-                        heartbeatList[monitorId] = {
-                            status: parseInt(status),
-                            time: time,
-                            name: name
-                        };
-                        uptimeList[monitorId] = parseInt(status) === 1 ? '99%+' : '0%';
-                    }
-                });
-            }
-            
-            res.json({
-                heartbeatList,
-                uptimeList,
-                success: true,
-                timestamp: new Date().toISOString()
-            });
-        });
-    } catch (error) {
-        res.json({
-            heartbeatList: {},
-            uptimeList: {},
             success: false,
             error: error.message
         });
