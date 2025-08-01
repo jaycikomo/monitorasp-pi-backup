@@ -10,8 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@tuya/tuya-connector-nodejs": "^2.1.2",
+    "axios": "^1.11.0",
     "child_process": "^1.0.2",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.1",
     "ejs": "^3.1.10",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "tuyapi": "^7.7.1"
   }
 }

@@ -1,0 +1,37 @@
+{
+  "devices": {
+    "toilette_couloir": {
+      "id": "bf6480ec89f20f8e36rkpf",
+      "key": "votre_clé_locale",
+      "name": "Toilette couloir",
+      "type": "sensor",
+      "room": "Couloir",
+      "icon": "🚽"
+    },
+    "studio": {
+      "id": "bf87c2a9cab7f77bdfppjm", 
+      "key": "votre_clé_locale",
+      "name": "Studio",
+      "type": "wifi_reporter",
+      "room": "Studio",
+      "icon": "📶"
+    },
+    "local_piscine": {
+      "id": "bfd8aaee1f70e365bckuhw",
+      "key": "votre_clé_locale", 
+      "name": "Local piscine",
+      "type": "wifi_reporter",
+      "room": "Piscine",
+      "icon": "🏊"
+    }
+  },
+  "rooms": {
+    "Couloir": { "icon": "🚪", "color": "#3498db" },
+    "Studio": { "icon": "🏠", "color": "#e74c3c" },
+    "Piscine": { "icon": "🏊", "color": "#17a2b8" },
+    "Maison": { "icon": "🏡", "color": "#28a745" },
+    "Cuisine": { "icon": "👨‍🍳", "color": "#ffc107" },
+    "Gite": { "icon": "🏘️", "color": "#6f42c1" },
+    "Garage": { "icon": "🚗", "color": "#fd7e14" }
+  }
+}

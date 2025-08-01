@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure Réseau - Monitoring Temps Réel</title>
+    <meta http-equiv="refresh" content="60">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 5px solid;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card.total { border-left-color: #3498db; }
+        .stat-card.online { border-left-color: #27ae60; }
+        .stat-card.offline { border-left-color: #e74c3c; }
+        .stat-card.ping { border-left-color: #f39c12; }
+        .stat-number {
+            font-size: 2.8em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .device-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            border-left: 6px solid;
+            backdrop-filter: blur(15px);
+        }
+        .device-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .device-card.operational { border-left-color: #27ae60; }
+        .device-card.warning { border-left-color: #f39c12; }
+        .device-card.error { border-left-color: #e74c3c; }
+        .device-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .device-icon {
+            font-size: 3em;
+            margin-right: 15px;
+        }
+        .device-status {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-operational { background: #27ae60; }
+        .status-warning { background: #f39c12; }
+        .status-error { background: #e74c3c; }
+        .device-name {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .device-location {
+            color: #bdc3c7;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .device-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .detail-value {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #ecf0f1;
+        }
+        .detail-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .technical-info {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .tech-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .tech-item {
+            font-size: 0.9em;
+            padding: 5px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        .access-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+        .access-btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌐 Infrastructure Réseau Temps Réel</h1>
+        <p>Monitoring des équipements WiFi, routeurs et points d'accès - <%= lastUpdate %></p>
+    </div>
+
+    <div class="stats-overview">
+        <div class="stat-card total">
+            <span class="stat-number"><%= stats.total_devices %></span>
+            <span class="stat-label">📊 Équipements Réseau</span>
+        </div>
+        <div class="stat-card online">
+            <span class="stat-number"><%= stats.online %></span>
+            <span class="stat-label">🟢 Opérationnels</span>
+        </div>
+        <div class="stat-card offline">
+            <span class="stat-number"><%= stats.offline %></span>
+            <span class="stat-label">🔴 Hors Service</span>
+        </div>
+        <div class="stat-card ping">
+            <span class="stat-number"><%= stats.avg_response_time %>ms</span>
+            <span class="stat-label">⚡ Latence Moyenne</span>
+        </div>
+    </div>
+
+    <div class="devices-grid">
+        <% Object.values(devices).forEach(device => { %>
+            <div class="device-card <%= device.status %>">
+                <div class="device-header">
+                    <div style="display: flex; align-items: center;">
+                        <span class="device-icon"><%= device.icon %></span>
+                        <div>
+                            <div class="device-name"><%= device.name %></div>
+                            <div class="device-location">📍 <%= device.location %></div>
+                        </div>
+                    </div>
+                    <span class="device-status status-<%= device.status %>">
+                        <%= device.status === 'operational' ? '🟢 OPÉRATIONNEL' : 
+                            device.status === 'warning' ? '🟡 ATTENTION' : '🔴 ERREUR' %>
+                    </span>
+                </div>
+                
+                <div class="device-details">
+                    <div class="detail-item">
+                        <div class="detail-value"><%= device.ip %></div>
+                        <div class="detail-label">🌐 Adresse IP</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-value"><%= device.responseTime %>ms</div>
+                        <div class="detail-label">📡 Latence</div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-value"><%= device.protocol.toUpperCase() %></div>
+                        <div class="detail-label">🔒 Protocole</div>
+                    </div>
+                    
+                    <% if (device.model) { %>
+                        <div class="detail-item">
+                            <div class="detail-value"><%= device.model %></div>
+                            <div class="detail-label">🏷️ Modèle</div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <% if (device.wifi_info || device.system_info || device.network_services) { %>
+                    <div class="technical-info">
+                        <div class="tech-title">🔧 Informations Techniques</div>
+                        <div class="tech-list">
+                            <% if (device.wifi_info) { %>
+                                <% if (device.wifi_info.channel) { %>
+                                    <div class="tech-item">📶 Canal WiFi: <%= device.wifi_info.channel %></div>
+                                <% } %>
+                                <% if (device.wifi_info.mode) { %>
+                                    <div class="tech-item">📡 Mode: <%= device.wifi_info.mode %></div>
+                                <% } %>
+                                <% if (device.wifi_info.bands) { %>
+                                    <div class="tech-item">🌐 Bandes: <%= device.wifi_info.bands.join(', ') %></div>
+                                <% } %>
+                            <% } %>
+                            
+                            <% if (device.system_info) { %>
+                                <% if (device.system_info.firmware) { %>
+                                    <div class="tech-item">💾 Firmware: <%= device.system_info.firmware %></div>
+                                <% } %>
+                                <% if (device.system_info.uptime) { %>
+                                    <div class="tech-item">⏱️ Uptime: <%= device.system_info.uptime %></div>
+                                <% } %>
+                            <% } %>
+                            
+                            <% if (device.network_services && device.network_services.estimated_clients) { %>
+                                <div class="tech-item">👥 Clients: ~<%= device.network_services.estimated_clients %></div>
+                            <% } %>
+                            
+                            <% if (device.enterprise_features) { %>
+                                <div class="tech-item">🔐 VPN: <%= device.enterprise_features.vpn_tunnels || 'N/A' %></div>
+                                <div class="tech-item">🏢 VLAN: <%= device.enterprise_features.vlan_support || 'N/A' %></div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+
+                <% if (device.protocol && device.online) { %>
+                    <div style="text-align: center;">
+                        <a href="<%= device.protocol %>://<%= device.ip %>" target="_blank" class="access-btn">
+                            🔗 Accéder à l'interface
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="footer">
+        <p>🔄 Actualisation automatique toutes les 60 secondes | 
+           <a href="/" style="color: white; text-decoration: none;">🏠 Dashboard Principal</a> |
+           Infrastructure réseau surveillée 24/7
+        </p>
+    </div>
+</body>
+</html>

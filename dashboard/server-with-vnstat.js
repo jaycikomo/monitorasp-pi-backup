@@ -888,3 +888,59 @@ app.get('/api/new-cameras-status', async (req, res) => {
     
     res.json({ cameras: results, stats });
 });
+
+// ========== INTEGRATION KOMOHOUSE SMART LIFE ==========
+
+// Modifier la route Smart Life existante
+app.get('/smartlife', async (req, res) => {
+    try {
+        console.log('🏠 Chargement page KomoHouse Smart Life...');
+        const devices = await smartLifeAPI.getAllDevices();
+        
+        // Calculer les statistiques
+        const stats = {
+            total: Object.keys(devices).length,
+            online: Object.values(devices).filter(d => d.online).length,
+            offline: Object.values(devices).filter(d => !d.online).length
+        };
+        
+        res.render('smartlife', {
+            devices: devices,
+            stats: stats,
+            serverIP: req.ip.replace('::ffff:', '') || '192.168.1.200',
+            lastUpdate: new Date().toLocaleString('fr-FR')
+        });
+    } catch (error) {
+        console.error('❌ Erreur KomoHouse:', error);
+        res.render('smartlife', {
+            devices: {},
+            stats: { total: 0, online: 0, offline: 0 },
+            serverIP: '192.168.1.200',
+            error: 'Erreur chargement KomoHouse'
+        });
+    }
+});
+
+// API pour données KomoHouse en temps réel
+app.get('/api/komohouse-devices', async (req, res) => {
+    try {
+        const devices = await smartLifeAPI.getAllDevices();
+        const stats = {
+            total: Object.keys(devices).length,
+            online: Object.values(devices).filter(d => d.online).length,
+            offline: Object.values(devices).filter(d => !d.online).length
+        };
+        
+        res.json({
+            success: true,
+            devices: devices,
+            stats: stats,
+            lastUpdate: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
