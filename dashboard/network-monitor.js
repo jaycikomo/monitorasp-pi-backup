@@ -1,242 +1,117 @@
-const { exec } = require('child_process');
-const axios = require('axios');
+// network-monitor.js - Module de monitoring réseau
+// Version 1.0 - Compatible Node.js v18.20.8
+
+const { spawn } = require('child_process');
 
 class NetworkMonitor {
     constructor() {
         this.devices = {
-            'freebox': {
-                name: 'Freebox Free',
-                ip: '192.168.1.254',
-                type: 'freebox',
-                icon: '📡',
-                location: 'Principal'
-            },
-            'tplink': {
+            'tp-link': {
                 name: 'TP-Link TL-WR841N',
                 ip: '10.0.1.200',
-                type: 'tplink',
-                icon: '📶',
-                location: 'Extérieur'
+                type: 'router',
+                status: 'unknown'
             },
             'cisco': {
                 name: 'Cisco RV132W',
-                ip: '10.0.1.251',
-                type: 'cisco',
-                icon: '🔀',
-                location: 'Principal'
+                ip: '10.0.1.251', 
+                type: 'router',
+                status: 'unknown'
             },
-            'repeteur': {
+            'freebox': {
+                name: 'Freebox Free',
+                ip: '192.168.1.254',
+                type: 'modem',
+                status: 'unknown'
+            },
+            'repeater': {
                 name: 'Répéteur Free',
                 ip: '192.168.1.177',
-                type: 'repeteur',
-                icon: '📡',
-                location: 'Extension'
+                type: 'repeater',
+                status: 'unknown'
             }
         };
+        
+        this.lastUpdate = null;
     }
 
-    // Monitoring principal
-    async getAllDevicesStatus() {
-        const results = {};
-        
-        for (const [id, device] of Object.entries(this.devices)) {
-            console.log(`🔍 Monitoring ${device.name}...`);
-            results[id] = await this.monitorDevice(device);
-        }
-        
-        return results;
+    // Test ping basique
+    async pingDevice(ip) {
+        return new Promise((resolve) => {
+            const ping = spawn('ping', ['-c', '1', '-W', '3', ip]);
+            let output = '';
+            
+            ping.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+            
+            ping.on('close', (code) => {
+                const isAlive = code === 0;
+                const responseTime = isAlive ? this.extractPingTime(output) : null;
+                resolve({ alive: isAlive, responseTime });
+            });
+            
+            setTimeout(() => {
+                ping.kill();
+                resolve({ alive: false, responseTime: null });
+            }, 5000);
+        });
     }
 
-    // Monitorer un équipement spécifique
-    async monitorDevice(device) {
-        const baseInfo = {
-            id: device.name.toLowerCase().replace(/\s+/g, '_'),
+    // Extraire temps de réponse ping
+    extractPingTime(output) {
+        const match = output.match(/time=(\d+\.?\d*)\s*ms/);
+        return match ? parseFloat(match[1]) : null;
+    }
+
+    // Test d'un équipement
+    async monitorDevice(deviceId) {
+        const device = this.devices[deviceId];
+        if (!device) return null;
+
+        console.log(`[NetworkMonitor] Testing ${device.name} (${device.ip})`);
+        
+        const result = {
+            id: deviceId,
             name: device.name,
             ip: device.ip,
             type: device.type,
-            icon: device.icon,
-            location: device.location,
-            lastCheck: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            ping: null,
+            status: 'offline'
         };
 
         try {
-            // Test de connectivité (ping)
-            const pingResult = await this.pingDevice(device.ip);
+            result.ping = await this.pingDevice(device.ip);
             
-            if (!pingResult.online) {
-                return {
-                    ...baseInfo,
-                    online: false,
-                    status: 'offline',
-                    error: 'Ping failed',
-                    responseTime: null,
-                    details: {}
-                };
+            if (result.ping.alive) {
+                result.status = 'online';
+                this.devices[deviceId].status = 'online';
+                this.devices[deviceId].lastSeen = result.timestamp;
             }
-
-            // Test HTTP
-            const httpResult = await this.testHTTP(device.ip);
             
-            // Récupérer les informations spécifiques selon le type
-            const specificInfo = await this.getDeviceSpecificInfo(device);
-            
-            return {
-                ...baseInfo,
-                online: true,
-                status: httpResult.accessible ? 'online' : 'ping_only',
-                responseTime: pingResult.responseTime,
-                httpAccessible: httpResult.accessible,
-                details: {
-                    ...specificInfo,
-                    ping: pingResult.responseTime,
-                    httpStatus: httpResult.status
-                }
-            };
-
         } catch (error) {
-            return {
-                ...baseInfo,
-                online: false,
-                status: 'error',
-                error: error.message,
-                responseTime: null,
-                details: {}
-            };
+            console.error(`[NetworkMonitor] Error testing ${device.name}:`, error.message);
+            result.error = error.message;
         }
+
+        return result;
     }
 
-    // Test de ping
-    async pingDevice(ip) {
-        return new Promise((resolve) => {
-            exec(`ping -c 1 -W 2 ${ip}`, (error, stdout) => {
-                if (error) {
-                    resolve({ online: false, responseTime: null });
-                    return;
-                }
-                
-                const timeMatch = stdout.match(/time=([0-9.]+)/);
-                const responseTime = timeMatch ? parseFloat(timeMatch[1]) : null;
-                
-                resolve({ online: true, responseTime });
-            });
-        });
-    }
-
-    // Test HTTP
-    async testHTTP(ip) {
-        try {
-            const response = await axios.get(`http://${ip}`, { 
-                timeout: 3000,
-                validateStatus: () => true 
-            });
-            
-            return {
-                accessible: true,
-                status: response.status,
-                title: this.extractTitle(response.data)
-            };
-        } catch (error) {
-            return {
-                accessible: false,
-                status: null,
-                error: error.message
-            };
-        }
-    }
-
-    // Extraire le titre de la page
-    extractTitle(html) {
-        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        return titleMatch ? titleMatch[1].trim() : 'Sans titre';
-    }
-
-    // Informations spécifiques par type d'équipement
-    async getDeviceSpecificInfo(device) {
-        switch (device.type) {
-            case 'freebox':
-                return this.getFreeboxInfo(device.ip);
-            case 'tplink':
-                return this.getTpLinkInfo(device.ip);
-            case 'cisco':
-                return this.getCiscoInfo(device.ip);
-            case 'repeteur':
-                return this.getRepeteurInfo(device.ip);
-            default:
-                return {};
-        }
-    }
-
-    async getFreeboxInfo(ip) {
-        // Informations Freebox (simulation basée sur ce qui est généralement disponible)
+    // API pour le dashboard
+    async getNetworkStatus() {
         return {
-            type: 'Box Internet',
-            wifi_status: 'Actif',
-            estimated_clients: Math.floor(Math.random() * 15) + 5,
-            signal_strength: Math.floor(Math.random() * 30) + 70 + '%'
-        };
-    }
-
-    async getTpLinkInfo(ip) {
-        return {
-            type: 'Point d\'accès extérieur',
-            model: 'TL-WR841N',
-            wifi_mode: '802.11n',
-            estimated_channel: Math.floor(Math.random() * 11) + 1,
-            power_level: 'Élevé'
-        };
-    }
-
-    async getCiscoInfo(ip) {
-        return {
-            type: 'Routeur entreprise',
-            model: 'RV132W',
-            vpn_status: 'Disponible',
-            firewall: 'Actif'
-        };
-    }
-
-    async getRepeteurInfo(ip) {
-        return {
-            type: 'Amplificateur WiFi',
-            mode: 'Répéteur',
-            parent_network: 'Freebox'
-        };
-    }
-
-    // Calculer les statistiques globales
-    calculateNetworkStats(devices) {
-        const stats = {
-            total: Object.keys(devices).length,
-            online: 0,
-            offline: 0,
-            pingOnly: 0,
-            avgResponseTime: 0
-        };
-
-        let totalResponseTime = 0;
-        let responseTimeCount = 0;
-
-        Object.values(devices).forEach(device => {
-            if (device.status === 'online') {
-                stats.online++;
-            } else if (device.status === 'ping_only') {
-                stats.pingOnly++;
-            } else {
-                stats.offline++;
+            devices: this.devices,
+            lastUpdate: this.lastUpdate,
+            summary: {
+                total: Object.keys(this.devices).length,
+                online: Object.values(this.devices).filter(d => d.status === 'online').length,
+                accessible: Object.values(this.devices).filter(d => d.status === 'accessible').length,
+                offline: Object.values(this.devices).filter(d => d.status !== 'online' && d.status !== 'accessible').length,
+                lastScan: this.lastUpdate
             }
-
-            if (device.responseTime) {
-                totalResponseTime += device.responseTime;
-                responseTimeCount++;
-            }
-        });
-
-        stats.avgResponseTime = responseTimeCount > 0 
-            ? (totalResponseTime / responseTimeCount).toFixed(1)
-            : 0;
-
-        return stats;
+        };
     }
 }
 
-module.exports = new NetworkMonitor();
+module.exports = NetworkMonitor;

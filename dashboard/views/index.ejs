@@ -127,6 +127,68 @@
             </div>
         </div>
 
+        <!-- Widget Infrastructure Réseau - Version Simple -->
+        <div class="admin-section" style="background: linear-gradient(135deg, #17a2b8, #20c997); margin-bottom: 30px;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: white; margin: 0;">
+                    <span class="emoji">🌐</span> Infrastructure Réseau
+                </h3>
+                <span class="status-indicator status-success" style="margin-left: auto;">
+                    Auto-refresh
+                </span>
+            </div>
+            
+            <div class="system-info" style="margin-bottom: 20px;">
+                <div class="system-card">
+                    <strong style="color: #28a745;">🟢 En Ligne</strong>
+                    <span style="font-size: 1.5em; color: #28a745;" id="net-online">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #17a2b8;">🔗 Accessible</strong>
+                    <span style="font-size: 1.5em; color: #17a2b8;" id="net-accessible">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #dc3545;">🔴 Hors Ligne</strong>
+                    <span style="font-size: 1.5em; color: #dc3545;" id="net-offline">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #6c757d;">📊 Total</strong>
+                    <span style="font-size: 1.5em; color: #ecf0f1;">4</span>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                <div style="text-align: center; color: #ecf0f1;" id="device-list">
+                    📡 <span id="tp-name">TP-Link</span>: <span id="tp-status">En ligne</span><br>
+                    🔀 <span id="cisco-name">Cisco</span>: <span id="cisco-status">En ligne</span><br>
+                    📶 <span id="freebox-name">Freebox</span>: <span id="freebox-status">En ligne</span><br>
+                    🖥️ <span id="rep-name">Répéteur</span>: <span id="rep-status">En ligne</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="testNetwork()" class="admin-btn" style="flex: 1;">
+                    <span>🔄</span> Test Rapide
+                </button>
+                <a href="/network" class="admin-btn" style="flex: 1; text-align: center;">
+                    <span>📋</span> Détails
+                </a>
+            </div>
+        </div>
+
+                .catch(error => {
+                    console.error('❌ Network test failed:', error);
+                });
+        }
+        
+        // Test automatique au chargement
+
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
+            </div>
+        </div>
+
         <!-- Statistiques -->
         <div class="stats-overview">
             <div class="stat-card">
@@ -402,6 +464,108 @@
     </div>
 
     <script>
+
+        // Fonction Test Réseau pour le bouton
+        function testNetwork() {
+            console.log('🔄 Test réseau manuel lancé...');
+            
+            // Éléments à mettre à jour
+            const onlineEl = document.getElementById('net-online');
+            const accessibleEl = document.getElementById('net-accessible');
+            const offlineEl = document.getElementById('net-offline');
+            
+            if (!onlineEl || !accessibleEl || !offlineEl) {
+                console.error('❌ Éléments HTML introuvables');
+                return;
+            }
+            
+            // Indicateur de chargement
+            onlineEl.textContent = '...';
+            accessibleEl.textContent = '...';
+            offlineEl.textContent = '...';
+            
+            // Appel API
+            fetch('/api/network-minimal')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('✅ Données reçues pour bouton:', data.summary);
+                    
+                    // Mettre à jour les statuts individuels des équipements
+                    if (data.details && data.details.length > 0) {
+                        data.details.forEach(function(device) {
+                            let statusEl, nameEl;
+                            if (device.ip === "10.0.1.200") {
+                                statusEl = document.getElementById("tp-status");
+                                nameEl = document.getElementById("tp-name");
+                            } else if (device.ip === "10.0.1.251") {
+                                statusEl = document.getElementById("cisco-status");
+                                nameEl = document.getElementById("cisco-name");
+                            } else if (device.ip === "192.168.1.254") {
+                                statusEl = document.getElementById("freebox-status");
+                                nameEl = document.getElementById("freebox-name");
+                            } else if (device.ip === "192.168.1.177") {
+                                statusEl = document.getElementById("rep-status");
+                                nameEl = document.getElementById("rep-name");
+                            }
+                            
+                            if (statusEl && nameEl) {
+                                const status = device.status === "online" ? 
+                                    "En ligne (" + device.responseTime + "ms)" : "Hors ligne";
+                                statusEl.textContent = status;
+                                statusEl.style.color = device.status === "online" ? "#28a745" : "#dc3545";
+                            }
+                        });
+                    }
+                    
+                    // Mettre à jour les statuts individuels des équipements
+                    if (data.details && data.details.length > 0) {
+                        data.details.forEach(function(device) {
+                            let statusEl, nameEl;
+                            if (device.ip === "10.0.1.200") {
+                                statusEl = document.getElementById("tp-status");
+                                nameEl = document.getElementById("tp-name");
+                            } else if (device.ip === "10.0.1.251") {
+                                statusEl = document.getElementById("cisco-status");
+                                nameEl = document.getElementById("cisco-name");
+                            } else if (device.ip === "192.168.1.254") {
+                                statusEl = document.getElementById("freebox-status");
+                                nameEl = document.getElementById("freebox-name");
+                            } else if (device.ip === "192.168.1.177") {
+                                statusEl = document.getElementById("rep-status");
+                                nameEl = document.getElementById("rep-name");
+                            }
+                            
+                            if (statusEl && nameEl) {
+                                const status = device.status === "online" ? 
+                                    "En ligne (" + device.responseTime + "ms)" : "Hors ligne";
+                                statusEl.textContent = status;
+                                statusEl.style.color = device.status === "online" ? "#28a745" : "#dc3545";
+                            }
+                        });
+                    }
+                    
+                    if (data && data.summary) {
+                        onlineEl.textContent = data.summary.online;
+                        accessibleEl.textContent = data.summary.accessible;
+                        offlineEl.textContent = data.summary.offline;
+                        
+                        // Animation de confirmation
+                        [onlineEl, accessibleEl, offlineEl].forEach(function(el) {
+                            el.style.backgroundColor = '#4CAF5030';
+                            setTimeout(function() { el.style.backgroundColor = ''; }, 800);
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('❌ Erreur test manuel:', error);
+                    onlineEl.textContent = '!';
+                    accessibleEl.textContent = '!';
+                    offlineEl.textContent = '!';
+                });
+        }
         // Variables globales pour le monitoring Uptime Kuma
         let kumaRefreshInterval;
         let kumaData = {};
@@ -632,5 +796,47 @@
             }
         }
     </script>
+
 </body>
+        // ========================================
+        // FONCTION TEST RÉSEAU SIMPLE ET PROPRE
+        // ========================================
+        // ========================================
+        // INITIALISATION AU CHARGEMENT
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page chargée, initialisation...');
+            
+            // Test automatique après 2 secondes
+            setTimeout(function() {
+                console.log('⏰ Lancement du test automatique...');
+                testNetwork();
+            }, 2000);
+            
+            // Auto-refresh toutes les 60 secondes
+            setInterval(function() {
+                console.log('🔄 Refresh automatique...');
+                testNetwork();
+            }, 60000);
+        });
+        
+        // ========================================
+        // FONCTION DE DEBUG (pour développement)
+        // ========================================
+        
+        function debugNetwork() {
+            console.log('🔍 Debug réseau...');
+            console.log('Éléments HTML:', {
+                online: document.getElementById('net-online'),
+                accessible: document.getElementById('net-accessible'),
+                offline: document.getElementById('net-offline')
+            });
+            
+            fetch('/api/network-minimal')
+                .then(response => response.json())
+                .then(data => console.log('🔍 Données API:', data))
+                .catch(error => console.error('🔍 Erreur API:', error));
+        }
+        
 </html>

@@ -16,12 +16,13 @@
         .admin-title { font-size: 1.8em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .admin-section { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
         .admin-section h3 { margin-bottom: 15px; color: #ecf0f1; }
-        .status-indicator { padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; display: inline-block; }
+        .status-indicator { padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: bold; display: inline-block; transition: all 0.2s ease; }
         .status-success { background: #27ae60; color: white; }
         .status-warning { background: #f39c12; color: white; }
         .status-error { background: #e74c3c; color: white; }
         .admin-btn { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; margin: 5px; text-decoration: none; display: inline-block; }
         .admin-btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .admin-btn:disabled { background: #6c757d; cursor: not-allowed; transform: none; }
         .admin-btn.danger { background: #e74c3c; font-size: 1.1em; padding: 15px 30px; }
         .admin-btn.warning { background: #f39c12; }
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
@@ -53,18 +54,20 @@
         <div class="header">
             <h1><span class="emoji">🌐</span>Dashboard Réseau & Administration</h1>
             <p>Raspberry Pi <%= serverIP %> | <%= new Date().toLocaleString('fr-FR') %></p>
-        </div><!-- Panel d'Administration -->
+        </div>
+
+        <!-- Panel d'Administration -->
         <div class="admin-panel">
             <div class="admin-title">
                 <span class="emoji">🔧</span>Panel d'Administration
             </div>
-            
+
             <!-- Statut du Backup -->
             <div class="admin-section">
                 <h3>☁️ Backup GitHub</h3>
                 <div class="backup-info">
                     <span class="status-indicator status-<%= backupStatus.status %>">
-                        <%= backupStatus.status === 'success' ? '✅ OK' : 
+                        <%= backupStatus.status === 'success' ? '✅ OK' :
                             backupStatus.status === 'warning' ? '⚠️ Ancien' : '❌ Erreur' %>
                     </span>
                     <span>Dernier backup: <%= backupStatus.lastBackup %></span>
@@ -124,6 +127,62 @@
             </div>
         </div>
 
+
+        <!-- Widget Infrastructure Réseau -->
+        <div class="admin-section" style="background: linear-gradient(135deg, #17a2b8, #20c997); margin-bottom: 30px;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: white; margin: 0;">
+                    <span class="emoji">🌐</span> Infrastructure Réseau
+                </h3>
+                <span id="networkSummaryBadge" class="status-indicator status-success" style="margin-left: auto;">
+                    Loading...
+                </span>
+            </div>
+            
+            <!-- Métriques réseau style dashboard -->
+            <div class="system-info" style="margin-bottom: 20px;">
+                <div class="system-card">
+                    <strong style="color: #28a745;">🟢 En Ligne</strong>
+                    <span id="networkOnline" style="font-size: 1.5em; color: #28a745;">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #17a2b8;">🔗 Accessible</strong>
+                    <span id="networkAccessible" style="font-size: 1.5em; color: #17a2b8;">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #dc3545;">🔴 Hors Ligne</strong>
+                    <span id="networkOffline" style="font-size: 1.5em; color: #dc3545;">-</span>
+                </div>
+                <div class="system-card">
+                    <strong style="color: #6c757d;">📊 Total</strong>
+                    <span id="networkTotal" style="font-size: 1.5em; color: #ecf0f1;">4</span>
+                </div>
+            </div>
+
+            <!-- Liste des équipements -->
+            <div id="networkDevicesList" style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px; max-height: 120px; overflow-y: auto;">
+                <div style="text-align: center; color: #ecf0f1;">
+                    <span style="animation: spin 1s linear infinite;">⟳</span> Chargement des équipements...
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px;">
+                <button id="quickNetworkScan" class="admin-btn" style="flex: 1;">
+                    <span>🔄</span> Scan Rapide
+                </button>
+                <a href="/network" class="admin-btn" style="flex: 1; text-align: center;">
+                    <span>📋</span> Détails Complets
+                </a>
+            </div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <small style="color: rgba(255,255,255,0.8);">
+                    Dernière mise à jour: <span id="networkLastUpdate">Jamais</span>
+                </small>
+            </div>
+        </div>
+
         <!-- Statistiques -->
         <div class="stats-overview">
             <div class="stat-card">
@@ -143,141 +202,73 @@
                 <span class="stat-label">📋 Événements Réseau</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number"><%= rebootHistory.length %></span>
-                <span class="stat-label">🔄 Redémarrages</span>
+		<span class="stat-number"><%= rebootHistory.filter(r => new Date(r.timestamp).toDateString() === new Date().toDateString()).length %></span>
+		<span class="stat-label">🔄 Redémarrages (Aujourd'hui)</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number"><%= uptimeKumaData.stats.total %></span>
+                <span class="stat-number" id="kuma-total-display">--</span>
                 <span class="stat-label">📹 Monitors Surveillance</span>
             </div>
-        </div><!-- Section Uptime Kuma -->
+        </div>
+
+        <!-- Section Uptime Kuma AUTOMATIQUE -->
         <div class="uptime-kuma-section">
             <div class="uptime-header">
                 <div class="uptime-title">
                     <span class="emoji">📹</span>
-                    Surveillance Uptime Kuma
+                    Surveillance Uptime Kuma (Auto)
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <span class="status-indicator <%= uptimeKumaData.serviceActive && uptimeKumaData.webAccessible ? 'status-success' : 'status-error' %>">
-                        <%= uptimeKumaData.serviceActive && uptimeKumaData.webAccessible ? '🟢 En ligne' : '🔴 Hors ligne' %>
+                    <span id="kuma-service-status" class="status-indicator status-warning">
+                        🔄 Synchronisation...
                     </span>
-                    <a href="<%= uptimeKumaData.url %>" target="_blank" class="admin-btn" style="text-decoration: none; font-size: 0.9em; padding: 8px 16px;">
+                    <a href="http://192.168.1.200:3001/dashboard" target="_blank" class="admin-btn" style="text-decoration: none; font-size: 0.9em; padding: 8px 16px;">
                         🔗 Ouvrir Dashboard
                     </a>
+                    <button onclick="refreshKumaData()" id="kuma-refresh-btn" class="admin-btn" style="font-size: 0.9em; padding: 8px 16px;">🔄 Actualiser</button>
                 </div>
             </div>
 
-            <% if (uptimeKumaData.serviceActive && uptimeKumaData.webAccessible) { %>
-                <!-- Statistiques des monitors -->
-                <div class="uptime-stats">
-                    <div class="uptime-metric" style="background: #d4edda; border-left: 4px solid #28a745;">
-                        <span class="uptime-metric-value" style="color: #155724;">
-                            <%= uptimeKumaData.stats.up %>
-                        </span>
-                        <div class="uptime-metric-label" style="color: #155724;">
-                            🟢 Services UP
-                        </div>
-                    </div>
-
-                    <div class="uptime-metric" style="background: #f8d7da; border-left: 4px solid #dc3545;">
-                        <span class="uptime-metric-value" style="color: #721c24;">
-                            <%= uptimeKumaData.stats.down %>
-                        </span>
-                        <div class="uptime-metric-label" style="color: #721c24;">
-                            🔴 Services DOWN
-                        </div>
-                    </div>
-
-                    <div class="uptime-metric" style="background: #fff3cd; border-left: 4px solid #ffc107;">
-                        <span class="uptime-metric-value" style="color: #856404;">
-                            <%= uptimeKumaData.stats.pending %>
-                        </span>
-                        <div class="uptime-metric-label" style="color: #856404;">
-                            ⏳ En attente
-                        </div>
-                    </div>
-
-                    <div class="uptime-metric" style="background: #d1ecf1; border-left: 4px solid #17a2b8;">
-                        <span class="uptime-metric-value" style="color: #0c5460;">
-                            <%= uptimeKumaData.stats.total %>
-                        </span>
-                        <div class="uptime-metric-label" style="color: #0c5460;">
-                            📊 Total Monitors
-                        </div>
-                    </div>
+            <!-- Statistiques automatiques -->
+            <div class="uptime-stats">
+                <div class="uptime-metric" style="background: #d4edda; border-left: 4px solid #28a745;">
+                    <span class="uptime-metric-value" style="color: #155724;" id="kuma-up-count">--</span>
+                    <div class="uptime-metric-label" style="color: #155724;">🟢 Services UP</div>
                 </div>
 
-                <!-- Grille des monitors avec aperçu -->
-                <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 20px;">
-                    <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Aperçu Monitors</h4>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamAbriMoto</div>
-                            <div style="font-size: 0.8em; color: #155724;">99.73% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamAtelier</div>
-                            <div style="font-size: 0.8em; color: #155724;">71.39% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamEnclos</div>
-                            <div style="font-size: 0.8em; color: #155724;">87.95% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamEntree</div>
-                            <div style="font-size: 0.8em; color: #155724;">71.76% UP</div>
-                        </div>
-                        
-                        <div style="background: #fff3cd; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #ffc107;">
-                            <div style="font-weight: bold; color: #856404;">🟡 CamExtVoiture</div>
-                            <div style="font-size: 0.8em; color: #856404;">27.60% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamLocalPiscine</div>
-                            <div style="font-size: 0.8em; color: #155724;">81.34% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamParking</div>
-                            <div style="font-size: 0.8em; color: #155724;">87.65% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamPiscineExterieure</div>
-                            <div style="font-size: 0.8em; color: #155724;">63.60% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 CamPortail</div>
-                            <div style="font-size: 0.8em; color: #155724;">87.67% UP</div>
-                        </div>
-                        
-                        <div style="background: #d4edda; padding: 10px; border-radius: 8px; text-align: center; border-left: 4px solid #28a745;">
-                            <div style="font-weight: bold; color: #155724;">🟢 monitorasp</div>
-                            <div style="font-size: 0.8em; color: #155724;">100% UP</div>
-                        </div>
-                    </div>
+                <div class="uptime-metric" style="background: #f8d7da; border-left: 4px solid #dc3545;">
+                    <span class="uptime-metric-value" style="color: #721c24;" id="kuma-down-count">--</span>
+                    <div class="uptime-metric-label" style="color: #721c24;">🔴 Services DOWN</div>
                 </div>
 
-            <% } else { %>
-                <!-- Uptime Kuma non accessible -->
-                <div style="text-align: center; padding: 30px; background: #f8d7da; border-radius: 10px; color: #721c24;">
-                    <div style="font-size: 3em; margin-bottom: 15px;">🚫</div>
-                    <h3>Service Uptime Kuma non accessible</h3>
-                    <p>Vérifiez que le service est démarré</p>
-                    <div style="margin-top: 20px;">
-                        <a href="<%= uptimeKumaData.url %>" target="_blank" class="admin-btn danger">
-                            🔗 Essayer d'accéder
-                        </a>
-                    </div>
+                <div class="uptime-metric" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <span class="uptime-metric-value" style="color: #856404;" id="kuma-warning-count">--</span>
+                    <div class="uptime-metric-label" style="color: #856404;">⚠️ Warning</div>
                 </div>
-            <% } %>
-        </div><!-- Section UPS/Onduleur -->
+
+                <div class="uptime-metric" style="background: #d1ecf1; border-left: 4px solid #17a2b8;">
+                    <span class="uptime-metric-value" style="color: #0c5460;" id="kuma-total-count">--</span>
+                    <div class="uptime-metric-label" style="color: #0c5460;">📊 Total Monitors</div>
+                </div>
+            </div>
+
+            <!-- Grille des monitors automatique -->
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-top: 20px;">
+                <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Monitors en Temps Réel</h4>
+                
+                <div id="kuma-monitors-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">🔄 Chargement des monitors...</div>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                    <small id="kuma-sync-info" style="color: #6c757d;">
+                        🔗 En attente de synchronisation...
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section UPS/Onduleur -->
         <% if (upsData.available) { %>
             <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 6px solid #ffc107;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -341,7 +332,7 @@
                                     <span style="color: #667eea; font-weight: 500;"><%= interfaceStatus[iface].ip %></span>
                                 </div>
                             <% } %>
-                            
+
                             <% if (interfaceStatus[iface].ssid) { %>
                                 <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
                                     <span style="font-weight: 600; color: #495057;">📡 Réseau Wi-Fi</span>
@@ -377,14 +368,16 @@
                     </div>
                 <% } %>
             <% } %>
-        </div><!-- Historiques des événements -->
+        </div>
+
+        <!-- Historiques des événements -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px;">
             <!-- Historique des redémarrages -->
             <div style="background: white; border-radius: 15px; padding: 30px;">
                 <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
                     <span class="emoji">🔄</span> Historique des Redémarrages
                 </div>
-                
+
                 <div style="max-height: 350px; overflow-y: auto;">
                     <% if (rebootHistory && rebootHistory.length > 0) { %>
                         <% for (let i = 0; i < rebootHistory.length; i++) { %>
@@ -414,7 +407,7 @@
                 <div style="font-size: 1.6em; color: #2c3e50; margin-bottom: 20px; display: flex; align-items: center;">
                     <span class="emoji">📋</span> Événements Réseau
                 </div>
-                
+
                 <div style="max-height: 350px; overflow-y: auto;">
                     <% if (connectionHistory.length > 0) { %>
                         <% for (let i = 0; i < connectionHistory.length; i++) { %>
@@ -445,26 +438,205 @@
             </div>
         </div>
 
-	<div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.5); border-radius: 10px; color: #6c757d;">
-        	    <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes | 
-            		<a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.5); border-radius: 10px; color: #6c757d;">
+            <span class="emoji">🔄</span> Actualisation automatique toutes les 60 secondes |
+            <a href="http://192.168.1.200/cgi-bin/nut/upsstats.cgi" target="_blank" style="color: #667eea; text-decoration: none;">
                 🔗 Interface UPS détaillée
-            		</a> | 
-            	<a href="http://192.168.1.200:3001/dashboard" target="_blank" style="color: #667eea; text-decoration: none;">
-                	🔗 Dashboard Uptime Kuma
-            		</a> | 
-            	<a href="http://192.168.1.200:3000/cameras" target="_blank" style="color: #667eea; text-decoration: none;">
-                	🔗 Dashboard Caméras
-            	</a>
-		<a href="/smartlife" class="grid-item external-link">
-    			<div class="item-icon">🏠</div>
-    			<div class="item-title">Smart Life</div>
-    			<div class="item-subtitle">Domotique</div>
-			</a>
-        	</div>    
-	</div>
+            </a> |
+            <a href="http://192.168.1.200:3001/dashboard" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Dashboard Uptime Kuma
+            </a> |
+            <a href="http://192.168.1.200:3000/cameras" target="_blank" style="color: #667eea; text-decoration: none;">
+                🔗 Dashboard Caméras
+            </a>
+            <a href="/smartlife" class="grid-item external-link">
+                <div class="item-icon">🏠</div>
+                <div class="item-title">Smart Life</div>
+                <div class="item-subtitle">Domotique</div>
+            </a>
+        </div>
+    </div>
 
     <script>
+        // Variables globales pour le monitoring Uptime Kuma
+        let kumaRefreshInterval;
+        let kumaData = {};
+
+        // Fonction pour charger les données Uptime Kuma
+        async function loadKumaData() {
+            try {
+                document.getElementById('kuma-service-status').innerHTML = '🔄 Synchronisation...';
+                document.getElementById('kuma-service-status').className = 'status-indicator status-warning';
+                
+                const response = await fetch('/api/cameras-from-kuma');
+                const data = await response.json();
+                
+                if (data.success) {
+                    kumaData = data;
+                    updateKumaDisplay(data);
+                    
+                    document.getElementById('kuma-service-status').innerHTML = '✅ Connecté';
+                    document.getElementById('kuma-service-status').className = 'status-indicator status-success';
+                } else {
+                    throw new Error('API returned error');
+                }
+                
+            } catch (error) {
+                console.error('Erreur chargement Uptime Kuma:', error);
+                document.getElementById('kuma-service-status').innerHTML = '❌ Erreur API';
+                document.getElementById('kuma-service-status').className = 'status-indicator status-error';
+                
+                // Afficher une erreur dans la grille
+                document.getElementById('kuma-monitors-grid').innerHTML = 
+                    '<div style="grid-column: 1/-1; text-align: center; padding: 20px; background: #f8d7da; border-radius: 8px; color: #721c24;">' +
+                    '❌ Impossible de charger les données Uptime Kuma<br><small>Vérifiez que l\'API fonctionne</small></div>';
+            }
+        }
+
+        // Fonction pour mettre à jour l'affichage
+        function updateKumaDisplay(data) {
+            const { cameras, stats } = data;
+            
+            // Mettre à jour les statistiques
+            document.getElementById('kuma-up-count').textContent = stats.online;
+            document.getElementById('kuma-down-count').textContent = stats.offline;
+            document.getElementById('kuma-warning-count').textContent = stats.warning;
+            document.getElementById('kuma-total-count').textContent = stats.total;
+            
+            // Mettre à jour aussi le stat-card principal
+            const totalDisplay = document.getElementById('kuma-total-display');
+            if (totalDisplay) {
+                totalDisplay.textContent = stats.total;
+            }
+            
+            // Générer la grille des monitors
+            const monitorsGrid = document.getElementById('kuma-monitors-grid');
+            monitorsGrid.innerHTML = '';
+            
+            Object.values(cameras).forEach(camera => {
+                const monitorCard = createMonitorCard(camera);
+                monitorsGrid.appendChild(monitorCard);
+            });
+            
+            // Mettre à jour l'info de synchronisation
+            document.getElementById('kuma-sync-info').innerHTML = 
+                `🔗 Dernière sync: ${stats.lastSync} • ${stats.message}`;
+        }
+
+        // Fonction pour créer une carte de monitor
+        function createMonitorCard(camera) {
+            const card = document.createElement('div');
+            
+            // Déterminer la couleur selon le statut
+            let bgColor, textColor, statusIcon;
+            switch(camera.status) {
+                case 'online':
+                    bgColor = '#d4edda';
+                    textColor = '#155724';
+                    statusIcon = '🟢';
+                    break;
+                case 'offline':
+                    bgColor = '#f8d7da';
+                    textColor = '#721c24';
+                    statusIcon = '🔴';
+                    break;
+                case 'warning':
+                    bgColor = '#fff3cd';
+                    textColor = '#856404';
+                    statusIcon = '⚠️';
+                    break;
+                default:
+                    bgColor = '#e2e3e5';
+                    textColor = '#383d41';
+                    statusIcon = '❓';
+            }
+            
+            card.style.cssText = `
+                background: ${bgColor};
+                border-radius: 8px;
+                padding: 12px;
+                text-align: center;
+                transition: transform 0.2s ease;
+                cursor: pointer;
+                border: 1px solid ${bgColor === '#fff3cd' ? '#ffc107' : bgColor === '#f8d7da' ? '#dc3545' : '#28a745'};
+            `;
+            
+            card.innerHTML = `
+                <div style="font-size: 1.2em; margin-bottom: 5px;">
+                    ${camera.emoji} ${statusIcon}
+                </div>
+                <div style="font-weight: bold; color: ${textColor}; font-size: 0.9em; margin-bottom: 3px;">
+                    ${camera.name}
+                </div>
+                <div style="font-size: 0.8em; color: ${textColor}; opacity: 0.8;">
+                    Uptime: ${camera.kumaUptime}
+                </div>
+                ${camera.pingTime ? `<div style="font-size: 0.75em; color: ${textColor}; opacity: 0.7; margin-top: 2px;">Ping: ${camera.pingTime}</div>` : ''}
+            `;
+            
+            // Effet hover
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = 'none';
+            });
+            
+            return card;
+        }
+
+        // Fonction pour rafraîchir manuellement
+        function refreshKumaData() {
+            const btn = document.getElementById('kuma-refresh-btn');
+            btn.innerHTML = '🔄 Actualisation...';
+            btn.disabled = true;
+            
+            loadKumaData().finally(() => {
+                setTimeout(() => {
+                    btn.innerHTML = '🔄 Actualiser';
+                    btn.disabled = false;
+                }, 1000);
+            });
+        }
+
+        // Fonction pour démarrer le monitoring automatique
+        function startKumaMonitoring() {
+            // Chargement initial
+            loadKumaData();
+            
+            // Actualisation automatique toutes les 30 secondes
+            kumaRefreshInterval = setInterval(loadKumaData, 30000);
+        }
+
+        // Fonction pour arrêter le monitoring
+        function stopKumaMonitoring() {
+            if (kumaRefreshInterval) {
+                clearInterval(kumaRefreshInterval);
+            }
+        }
+
+        // Démarrer automatiquement quand la page est chargée
+        document.addEventListener('DOMContentLoaded', () => {
+            // Attendre 2 secondes pour que la page soit bien chargée
+            setTimeout(startKumaMonitoring, 2000);
+        });
+
+        // Arrêter le monitoring quand on quitte la page
+        window.addEventListener('beforeunload', stopKumaMonitoring);
+
+        // Gestion de la visibilité de la page (pause quand l'onglet n'est pas actif)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopKumaMonitoring();
+            } else {
+                startKumaMonitoring();
+            }
+        });
+
+        // Fonctions existantes du dashboard
         function executeBackup() {
             if (confirm('Lancer une sauvegarde maintenant ?')) {
                 fetch('/admin/backup', { method: 'POST' })
@@ -515,6 +687,220 @@
                 alert('Confirmation incorrecte. Redémarrage annulé.');
             }
         }
+    </script>
+
+    <script>
+        // Widget Network Monitoring - JavaScript
+        class NetworkWidget {
+            constructor() {
+                this.refreshInterval = null;
+                this.isScanning = false;
+            }
+
+            // Initialisation du widget
+            async init() {
+                console.log('[NetworkWidget] Initializing...');
+                await this.refreshNetworkData();
+                this.setupEventListeners();
+                
+                // Auto-refresh toutes les 2 minutes
+                this.refreshInterval = setInterval(() => {
+                    this.refreshNetworkData();
+                }, 120000);
+            }
+
+            // Mettre à jour les données réseau
+            async refreshNetworkData() {
+                try {
+                    const response = await fetch('/api/network-minimal');
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.updateWidgetDisplay(result.data);
+                    } else {
+                        console.error('[NetworkWidget] Error:', result.error);
+                        this.showError(result.error);
+                    }
+                } catch (error) {
+                    console.error('[NetworkWidget] Fetch error:', error);
+                    this.showError('Erreur de connexion');
+                }
+            }
+
+            // Mettre à jour l'affichage du widget
+            updateWidgetDisplay(data) {
+                const summary = data.summary;
+                
+                // Mettre à jour les compteurs
+                document.getElementById('networkOnline').textContent = summary.online || 0;
+                document.getElementById('networkAccessible').textContent = summary.accessible || 0;
+                document.getElementById('networkOffline').textContent = summary.offline || 0;
+                document.getElementById('networkTotal').textContent = summary.total || 4;
+                
+                // Badge résumé
+                const badge = document.getElementById('networkSummaryBadge');
+                if (summary.offline === 0) {
+                    badge.className = 'status-indicator status-success';
+                    badge.textContent = 'Tout OK ✅';
+                } else if (summary.online > 0) {
+                    badge.className = 'status-indicator status-warning';
+                    badge.textContent = `${summary.offline} problème(s)`;
+                } else {
+                    badge.className = 'status-indicator status-error';
+                    badge.textContent = 'Problèmes détectés';
+                }
+                
+                // Liste des équipements
+                this.updateDevicesList(data.devices);
+                
+                // Dernière mise à jour
+                const lastUpdate = document.getElementById('networkLastUpdate');
+                if (data.lastUpdate) {
+                    lastUpdate.textContent = new Date(data.lastUpdate).toLocaleTimeString('fr-FR');
+                } else {
+                    lastUpdate.textContent = 'Jamais';
+                }
+            }
+
+            // Mettre à jour la liste des équipements
+            updateDevicesList(devices) {
+                const container = document.getElementById('networkDevicesList');
+                
+                if (!devices || Object.keys(devices).length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #ecf0f1;">Aucun équipement configuré</div>';
+                    return;
+                }
+
+                let html = '';
+                Object.entries(devices).forEach(([id, device]) => {
+                    const statusColor = 
+                        device.status === 'accessible' ? '#28a745' : 
+                        device.status === 'online' ? '#17a2b8' : '#dc3545';
+                    
+                    const statusIcon = 
+                        device.status === 'accessible' ? '🟢' : 
+                        device.status === 'online' ? '🔵' : '🔴';
+                    
+                    const deviceIcon = this.getDeviceIcon(device.type);
+                    
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.2em;">${deviceIcon}</span>
+                                <div>
+                                    <div style="font-weight: bold; color: #ecf0f1;">${device.name}</div>
+                                    <div style="font-size: 0.8em; color: rgba(255,255,255,0.7);">${device.ip}</div>
+                                </div>
+                            </div>
+                            <span style="color: ${statusColor}; font-size: 1.2em;">${statusIcon}</span>
+                        </div>
+                    `;
+                });
+                
+                // Enlever la dernière bordure
+                html = html.replace(/border-bottom: 1px solid rgba\(255,255,255,0\.1\);(?![\s\S]*border-bottom)/, '');
+                
+                container.innerHTML = html;
+            }
+
+            // Icônes des équipements
+            getDeviceIcon(type) {
+                const icons = {
+                    'router': '🔀',
+                    'modem': '📡',
+                    'repeater': '📶',
+                    'switch': '🔗'
+                };
+                return icons[type] || '🖥️';
+            }
+
+            // Scan rapide
+            async quickScan() {
+                if (this.isScanning) return;
+                
+                const button = document.getElementById('quickNetworkScan');
+                const originalText = button.innerHTML;
+                
+                this.isScanning = true;
+                button.innerHTML = '<span style="animation: spin 1s linear infinite;">⟳</span> Scan...';
+                button.disabled = true;
+                
+                try {
+                    const response = await fetch('/api/network-scan', {
+                        method: 'POST'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Actualiser les données après le scan
+                        await this.refreshNetworkData();
+                        console.log('[NetworkWidget] Scan completed successfully');
+                    } else {
+                        console.error('[NetworkWidget] Scan error:', result.error);
+                    }
+                } catch (error) {
+                    console.error('[NetworkWidget] Scan fetch error:', error);
+                } finally {
+                    this.isScanning = false;
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+
+            // Afficher une erreur
+            showError(message) {
+                const badge = document.getElementById('networkSummaryBadge');
+                badge.className = 'status-indicator status-error';
+                badge.textContent = 'Erreur';
+                
+                document.getElementById('networkDevicesList').innerHTML = 
+                    `<div style="text-align: center; color: #dc3545;">
+                        ⚠️ ${message}
+                    </div>`;
+            }
+
+            // Event listeners
+            setupEventListeners() {
+                const quickScanButton = document.getElementById('quickNetworkScan');
+                if (quickScanButton) {
+                    quickScanButton.addEventListener('click', () => this.quickScan());
+                }
+            }
+
+            // Nettoyage
+            destroy() {
+                if (this.refreshInterval) {
+                    clearInterval(this.refreshInterval);
+                }
+            }
+        }
+
+        // CSS pour l'animation de rotation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation automatique du widget
+        document.addEventListener('DOMContentLoaded', function() {
+            // Attendre un peu que la page soit chargée
+            setTimeout(() => {
+                window.networkWidget = new NetworkWidget();
+                window.networkWidget.init();
+            }, 2000);
+        });
+
+        // Nettoyage avant déchargement de la page
+        window.addEventListener('beforeunload', function() {
+            if (window.networkWidget) {
+                window.networkWidget.destroy();
+            }
+        });
     </script>
 </body>
 </html>
