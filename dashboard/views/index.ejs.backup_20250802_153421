@@ -52,41 +52,6 @@
             <p>Raspberry Pi <%= serverIP %> | <%= new Date().toLocaleString('fr-FR') %></p>
         </div>
 
-        <!-- Section Gestion Gîtes -->
-        <div style="background: linear-gradient(135deg, #4CAF50, #45a049); border-radius: 15px; padding: 25px; margin: 20px 0; color: white; box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);">
-            <h3 style="margin: 0 0 20px 0; display: flex; align-items: center; font-size: 1.4em;">
-                🏠 <span style="margin-left: 10px;">Gestion Gîtes La Bouilladisse</span>
-            </h3>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
-                <a href="http://192.168.1.200:3003/" target="_blank" 
-                   style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; text-decoration: none; color: white; text-align: center; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); display: block;">
-                    <div style="font-size: 2.5em; margin-bottom: 8px;">🏡</div>
-                    <div style="font-weight: 600; margin-bottom: 5px;">Dashboard Gîtes</div>
-                    <div style="font-size: 0.85em; opacity: 0.9;">Tableau de bord principal</div>
-                </a>
-                
-                <a href="http://192.168.1.200:3003/qr-codes.html" target="_blank"
-                   style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; text-decoration: none; color: white; text-align: center; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); display: block;">
-                    <div style="font-size: 2.5em; margin-bottom: 8px;">📱</div>
-                    <div style="font-weight: 600; margin-bottom: 5px;">QR Codes WiFi</div>
-                    <div style="font-size: 0.85em; opacity: 0.9;">Connexion invités</div>
-                </a>
-                
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 2.5em; margin-bottom: 8px;">📞</div>
-                    <div style="font-weight: 600; margin-bottom: 5px;">Contact Urgence</div>
-                    <div style="font-size: 0.75em; opacity: 0.9; line-height: 1.3;">J-C: 06 02 18 00 44<br>Charlène: 06 87 55 04 58</div>
-                </div>
-                
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
-                    <div style="font-size: 2.5em; margin-bottom: 8px;">📊</div>
-                    <div style="font-weight: 600; margin-bottom: 5px;">Statut Réseau</div>
-                    <div style="font-size: 0.85em; opacity: 0.9;">Monitoring actuel</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Panel d'Administration -->
         <div class="admin-panel">
             <div class="admin-title">
