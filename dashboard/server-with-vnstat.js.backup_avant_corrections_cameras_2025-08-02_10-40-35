@@ -1074,7 +1074,7 @@ app.get('/api/new-cameras-status', async (req, res) => {
     const newCameras = [
         { id: 'cam10', name: 'CamJoowin', ip: '10.0.1.200', interface: 'wlan1', emoji: '📷' },
         { id: 'cam11', name: 'CamSalon', ip: '192.168.1.44', interface: 'eth0', emoji: '🛋️' },
-        { id: 'cam12', name: 'CamIPC', ip: '10.0.1.41', interface: 'wlan1', emoji: '🎥' }
+        { id: 'cam12', name: 'CamIPC', ip: '10.0.1.207', interface: 'wlan1', emoji: '🎥' }
     ];
     
     const results = {};
@@ -1329,76 +1329,4 @@ app.get('/api/uptime-kuma', async (req, res) => {
             error: error.message
         });
     }
-});
-
-// API pour ping d'une caméra spécifique
-app.get('/api/ping-camera/:ip', async (req, res) => {
-    const { exec } = require('child_process');
-    const ip = req.params.ip;
-    
-    const pingCmd = `ping -c 1 -W 3 ${ip}`;
-    
-    exec(pingCmd, (error, stdout) => {
-        if (error) {
-            res.json({
-                success: false,
-                status: 'offline',
-                error: 'Timeout ou unreachable'
-            });
-        } else {
-            const timeMatch = stdout.match(/time=([0-9.]+) ms/);
-            const time = timeMatch ? parseFloat(timeMatch[1]) : 0;
-            
-            res.json({
-                success: true,
-                status: 'online',
-                time: Math.round(time)
-            });
-        }
-    });
-});
-
-// API pour ping de toutes les caméras
-app.get('/api/ping-all-cameras', async (req, res) => {
-    const { exec } = require('child_process');
-    
-    // Liste des IPs des caméras à partir du fichier
-    const cameras = [
-        { id: 'cam1', ip: '10.0.1.161' },
-        { id: 'cam2', ip: '10.0.1.162' },
-        { id: 'cam3', ip: '10.0.1.169' },
-        { id: 'cam4', ip: '10.0.1.163' },
-        { id: 'cam5', ip: '10.0.1.164' },
-        { id: 'cam6', ip: '10.0.1.165' },
-        { id: 'cam7', ip: '10.0.1.166' },
-        { id: 'cam8', ip: '10.0.1.167' },
-        { id: 'cam9', ip: '10.0.1.168' },
-        { id: 'cam10', ip: '10.0.1.200' },
-        { id: 'cam11', ip: '192.168.1.44' },
-        { id: 'cam12', ip: '10.0.1.41' }
-    ];
-    
-    const results = {};
-    
-    for (const camera of cameras) {
-        try {
-            const pingCmd = `ping -c 1 -W 3 ${camera.ip}`;
-            const result = await new Promise((resolve) => {
-                exec(pingCmd, (error, stdout) => {
-                    if (error) {
-                        resolve({ online: false });
-                    } else {
-                        const timeMatch = stdout.match(/time=([0-9.]+) ms/);
-                        const time = timeMatch ? parseFloat(timeMatch[1]) : 0;
-                        resolve({ online: true, time: Math.round(time) });
-                    }
-                });
-            });
-            results[camera.id] = result;
-        } catch (error) {
-            results[camera.id] = { online: false };
-        }
-    }
-    
-    res.json(results);
 });

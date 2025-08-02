@@ -136,7 +136,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #FF6B6B, #4ECDC4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🏍️ CamAbriMoto</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.161</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 60:83:e7:97:5b:4a</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C500 v1.0</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam1" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -156,7 +155,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #4ECDC4, #45B7D1); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🔧 CamAtelier</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.162</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 1c:61:b4:77:95:d7</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C210 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam2" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -176,7 +174,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #45B7D1, #96CEB4); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🌿 CamEnclos</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.169</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 14:eb:b6:9b:55:42</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C210 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam3" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -196,7 +193,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #96CEB4, #FFEAA7); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🚪 CamEntree</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.163</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 1c:61:b4:77:96:6f</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C210 v1.4.6</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam4" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -216,7 +212,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #FFEAA7, #DDA0DD); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🚗 CamExtVoiture</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.164</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 28:87:ba:7f:11:76</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C310 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam5" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -236,7 +231,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #DDA0DD, #98D8C8); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🏊 CamLocalPiscine</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.165</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 1c:61:b4:77:97:5a</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C210 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam6" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -256,7 +250,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #98D8C8, #F7DC6F); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🅿️ CamParking</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.166</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 14:eb:b6:99:b4:0d</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C310 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam7" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -276,7 +269,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #F7DC6F, #BB8FCE); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🏊‍♂️ CamPiscineExterieure</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.167</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 28:87:ba:c8:cb:2a</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C310 v1.3.16</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam8" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -296,7 +288,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #BB8FCE, #FF6B6B); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🚪 CamPortail</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.168</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 30:de:4b:ad:83:1f</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C500 v1</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam9" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -316,7 +307,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #E67E22, #F39C12); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">📷 CamJoowin</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.200</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 60:e3:27:cf:06:cc</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Joowin</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam10" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -336,7 +326,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #9B59B6, #8E44AD); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🛋️ CamSalon</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 192.168.1.44</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 14:eb:b6:3c:bb:63</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Tapo C200 v2</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: Principal</p>
                 <div id="test-result-cam11" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
@@ -356,7 +345,6 @@
             <div class="camera-stream" style="background: linear-gradient(135deg, #1ABC9C, #16A085); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: white;">
                 <h3 style="margin-bottom: 15px;">🎥 CamIPC</h3>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📍 IP: 10.0.1.41</p>
-                <p style="margin-bottom: 8px; opacity: 0.9;">🔧 MAC: 38:be:ab:5c:f0:1a</p>
                 <p style="margin-bottom: 8px; opacity: 0.9;">📹 Caméra IPC</p>
                 <p style="margin-bottom: 15px; opacity: 0.9;">📡 Réseau: JOOWIN_2G</p>
                 <div id="test-result-cam12" style="font-size: 0.9em; min-height: 20px; font-weight: bold;"></div>
