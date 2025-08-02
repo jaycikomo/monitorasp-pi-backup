@@ -1,8 +1,8 @@
-Backup créé le: 2025-08-02_00-27-39
+Backup créé le: 2025-08-02_02-00-02
 Raspberry Pi Model: Raspberry Pi 3 Model B Plus Rev 1.3
 OS Version: PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
 Kernel: 6.12.34+rpt-rpi-v8
-Uptime:  00:27:51 up 3 min,  3 users,  load average: 5.67, 3.64, 1.52
+Uptime:  02:00:14 up 23 min,  2 users,  load average: 0.96, 0.67, 0.92
 Services actifs:
   nut-driver-enumerator.path                                                                                                loaded active waiting   nut-driver-enumerator.path
   nut-server.service                                                                                                        loaded active running   Network UPS Tools - power devices information server
