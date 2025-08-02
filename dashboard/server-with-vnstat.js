@@ -1494,3 +1494,90 @@ app.get('/api/network-routes', (req, res) => {
         res.json(routes);
     });
 });
+
+// API pour ping d'un équipement spécifique (analyse réseau)
+app.get('/api/ping-device/:ip', async (req, res) => {
+    const { exec } = require('child_process');
+    const ip = req.params.ip;
+    
+    exec(`ping -c 1 -W 3 ${ip}`, (error, stdout) => {
+        if (error) {
+            res.json({ success: false, error: 'Timeout' });
+        } else {
+            const timeMatch = stdout.match(/time=([0-9.]+) ms/);
+            const time = timeMatch ? Math.round(parseFloat(timeMatch[1])) : 0;
+            res.json({ success: true, time: time });
+        }
+    });
+});
+
+// API pour les interfaces réseau
+app.get('/api/network-interfaces', (req, res) => {
+    const fs = require('fs');
+    
+    try {
+        const data = fs.readFileSync('/proc/net/dev', 'utf8');
+        const lines = data.split('\n');
+        const interfaces = {};
+        
+        lines.forEach(line => {
+            const match = line.match(/^\s*(eth0|wlan0|wlan1):\s*(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+)/);
+            if (match) {
+                interfaces[match[1]] = {
+                    rx_bytes: parseInt(match[2]),
+                    tx_bytes: parseInt(match[3])
+                };
+            }
+        });
+        
+        res.json(interfaces);
+    } catch (error) {
+        res.json({});
+    }
+});
+
+// API pour la table ARP
+app.get('/api/arp-table', (req, res) => {
+    const { exec } = require('child_process');
+    
+    exec('arp -a | grep -E "(192.168.1|10.0.1)"', (error, stdout) => {
+        if (error) {
+            res.json([]);
+            return;
+        }
+        
+        const entries = [];
+        const lines = stdout.split('\n').filter(line => line.trim());
+        
+        lines.forEach(line => {
+            const match = line.match(/\?\s+\(([^)]+)\)\s+at\s+([^\s]+)\s+\[ether\]\s+on\s+(\w+)/);
+            if (match) {
+                entries.push({
+                    ip: match[1],
+                    mac: match[2],
+                    interface: match[3]
+                });
+            }
+        });
+        
+        res.json(entries);
+    });
+});
+
+// API pour les routes réseau
+app.get('/api/network-routes', (req, res) => {
+    const { exec } = require('child_process');
+    
+    exec('ip route show', (error, stdout) => {
+        if (error) {
+            res.json(['Erreur de récupération des routes']);
+            return;
+        }
+        
+        const routes = stdout.split('\n')
+            .filter(line => line.trim())
+            .slice(0, 8); // Limiter à 8 routes principales
+            
+        res.json(routes);
+    });
+});
