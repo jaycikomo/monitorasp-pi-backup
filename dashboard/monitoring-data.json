@@ -1,30 +1,6 @@
 {
   "connectionHistory": [
     {
-      "timestamp": "2025-07-28T10:50:22.911Z",
-      "interface": "wlan1",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-28T11:00:03.290Z",
-      "interface": "wlan0",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-28T11:00:13.295Z",
-      "interface": "wlan0",
-      "event": "UP",
-      "internetStatus": true
-    },
-    {
-      "timestamp": "2025-07-28T11:00:13.295Z",
-      "interface": "wlan1",
-      "event": "DOWN",
-      "internetStatus": true
-    },
-    {
       "timestamp": "2025-07-28T11:00:23.297Z",
       "interface": "wlan1",
       "event": "UP",
@@ -5999,6 +5975,30 @@
       "interface": "wlan0",
       "event": "UP",
       "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-02T09:30:03.858Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-02T09:30:13.859Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-02T09:40:06.942Z",
+      "interface": "wlan0",
+      "event": "DOWN",
+      "internetStatus": true
+    },
+    {
+      "timestamp": "2025-08-02T09:40:16.951Z",
+      "interface": "wlan0",
+      "event": "UP",
+      "internetStatus": true
     }
   ],
   "interfaceStates": {
@@ -6134,9 +6134,9 @@
   },
   "downtimeStats": {
     "wlan0": {
-      "totalDowntime": 4602286,
-      "disconnections": 418,
-      "lastDownDuration": 10053
+      "totalDowntime": 4622296,
+      "disconnections": 420,
+      "lastDownDuration": 10009
     },
     "wlan1": {
       "totalDowntime": 26832801,

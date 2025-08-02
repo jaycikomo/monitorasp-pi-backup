@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse Réseau Avancée - MonitorAsp</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .device-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .device-status.online {
+            border-left: 4px solid #4caf50;
+        }
+
+        .device-status.offline {
+            border-left: 4px solid #f44336;
+        }
+
+        .device-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .device-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .device-ip {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .device-ping {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .interface-item, .arp-entry, .route-entry {
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .arp-entry {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+
+        .route-entry {
+            font-family: monospace;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← Dashboard Principal</a>
+
+    <div class="header">
+        <h1>🌐 Analyse Réseau Avancée</h1>
+        <p>Monitoring en temps réel de votre infrastructure réseau</p>
+        <div style="margin-top: 15px;">
+            <button class="refresh-btn" onclick="refreshAll()">🔄 Actualiser Tout</button>
+            <button class="refresh-btn" onclick="startAutoRefresh()">⚡ Auto-refresh</button>
+            <button class="refresh-btn" onclick="stopAutoRefresh()">⏸️ Pause</button>
+        </div>
+        <div id="last-update" style="margin-top: 10px; opacity: 0.8;"></div>
+    </div>
+
+    <div class="grid">
+        <!-- États des Équipements -->
+        <div class="card">
+            <div class="card-title">🌐 État des Équipements</div>
+            <div id="devices-status">
+                <div class="device-status" id="freebox">
+                    <div class="device-info">
+                        <div class="device-name">🏠 Freebox Free</div>
+                        <div class="device-ip">192.168.1.254</div>
+                    </div>
+                    <div class="device-ping">--</div>
+                </div>
+                <div class="device-status" id="cisco">
+                    <div class="device-info">
+                        <div class="device-name">🏢 Cisco RV132W</div>
+                        <div class="device-ip">10.0.1.251</div>
+                    </div>
+                    <div class="device-ping">--</div>
+                </div>
+                <div class="device-status" id="tplink">
+                    <div class="device-info">
+                        <div class="device-name">📶 TP-Link TL-WR841N</div>
+                        <div class="device-ip">10.0.1.200</div>
+                    </div>
+                    <div class="device-ping">--</div>
+                </div>
+                <div class="device-status" id="repeteur">
+                    <div class="device-info">
+                        <div class="device-name">📡 Répéteur Free</div>
+                        <div class="device-ip">192.168.1.178</div>
+                    </div>
+                    <div class="device-ping">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interfaces Réseau -->
+        <div class="card">
+            <div class="card-title">🔌 Interfaces Réseau</div>
+            <div id="interfaces-list">
+                <div class="interface-item">
+                    <div>
+                        <div><strong>eth0</strong> - Ethernet Principal</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;">Connexion filaire</div>
+                    </div>
+                    <div id="eth0-stats">--</div>
+                </div>
+                <div class="interface-item">
+                    <div>
+                        <div><strong>wlan0</strong> - WiFi Principal</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;">Réseau principal</div>
+                    </div>
+                    <div id="wlan0-stats">--</div>
+                </div>
+                <div class="interface-item">
+                    <div>
+                        <div><strong>wlan1</strong> - WiFi JOOWIN</div>
+                        <div style="font-size: 0.8em; opacity: 0.8;">Réseau caméras</div>
+                    </div>
+                    <div id="wlan1-stats">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table ARP -->
+        <div class="card">
+            <div class="card-title">📋 Table ARP (Clients Connectés)</div>
+            <div id="arp-table">Chargement...</div>
+        </div>
+
+        <!-- Routes Réseau -->
+        <div class="card">
+            <div class="card-title">🛤️ Routes Réseau</div>
+            <div id="routes-list">Chargement...</div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+        
+        // Fonction pour tester un équipement
+        async function testDevice(ip, elementId) {
+            try {
+                const response = await fetch(`/api/ping-device/${ip}`);
+                const data = await response.json();
+                const element = document.getElementById(elementId);
+                const pingElement = element.querySelector('.device-ping');
+                
+                if (data.success) {
+                    element.className = 'device-status online';
+                    pingElement.textContent = `${data.time}ms`;
+                    pingElement.style.color = '#4caf50';
+                } else {
+                    element.className = 'device-status offline';
+                    pingElement.textContent = 'Offline';
+                    pingElement.style.color = '#f44336';
+                }
+            } catch (error) {
+                const element = document.getElementById(elementId);
+                element.className = 'device-status offline';
+                element.querySelector('.device-ping').textContent = 'Erreur';
+            }
+        }
+
+        // Fonction pour charger les interfaces
+        async function loadInterfaces() {
+            try {
+                const response = await fetch('/api/network-interfaces');
+                const data = await response.json();
+                
+                Object.keys(data).forEach(iface => {
+                    const element = document.getElementById(`${iface}-stats`);
+                    if (element && data[iface]) {
+                        const rx = (data[iface].rx_bytes / 1024 / 1024).toFixed(1);
+                        const tx = (data[iface].tx_bytes / 1024 / 1024).toFixed(1);
+                        element.innerHTML = `
+                            <div style="text-align: right;">
+                                <div>↓ ${rx} MB</div>
+                                <div>↑ ${tx} MB</div>
+                            </div>
+                        `;
+                    }
+                });
+            } catch (error) {
+                console.error('Erreur interfaces:', error);
+            }
+        }
+
+        // Fonction pour charger la table ARP
+        async function loadArpTable() {
+            try {
+                const response = await fetch('/api/arp-table');
+                const data = await response.json();
+                const container = document.getElementById('arp-table');
+                
+                if (data.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; opacity: 0.6;">Aucun client détecté</div>';
+                    return;
+                }
+
+                container.innerHTML = data.map(entry => `
+                    <div class="arp-entry">
+                        <div><strong>${entry.ip}</strong></div>
+                        <div style="font-family: monospace;">${entry.mac}</div>
+                        <div>${entry.interface}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('arp-table').innerHTML = '<div style="color: #f44336;">Erreur de chargement</div>';
+            }
+        }
+
+        // Fonction pour charger les routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/network-routes');
+                const data = await response.json();
+                const container = document.getElementById('routes-list');
+                
+                container.innerHTML = data.map(route => `
+                    <div class="route-entry">${route}</div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('routes-list').innerHTML = '<div style="color: #f44336;">Erreur de chargement</div>';
+            }
+        }
+
+        // Fonction de rafraîchissement global
+        async function refreshAll() {
+            document.getElementById('last-update').textContent = `⏰ Dernière mise à jour: ${new Date().toLocaleTimeString()}`;
+            
+            // Tester tous les équipements
+            await Promise.all([
+                testDevice('192.168.1.254', 'freebox'),
+                testDevice('10.0.1.251', 'cisco'),
+                testDevice('10.0.1.200', 'tplink'),
+                testDevice('192.168.1.178', 'repeteur')
+            ]);
+            
+            // Charger les autres données
+            await Promise.all([
+                loadInterfaces(),
+                loadArpTable(),
+                loadRoutes()
+            ]);
+        }
+
+        // Auto-refresh
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(refreshAll, 10000);
+            console.log('Auto-refresh activé (10 secondes)');
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+                console.log('Auto-refresh désactivé');
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshAll();
+            startAutoRefresh();
+        });
+
+        // Nettoyage lors de la fermeture
+        window.addEventListener('beforeunload', stopAutoRefresh);
+    </script>
+</body>
+</html>
