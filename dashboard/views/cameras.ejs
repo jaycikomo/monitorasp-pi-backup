@@ -453,6 +453,37 @@
         window.addEventListener('load', () => {
             setTimeout(testAllCameras, 2000);
         });
+        // Mise à jour automatique des statuts
+        function updateCameraStatuses() {
+            fetch("/api/ping-all-cameras")
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Statuts reçus:", data);
+                    const cards = document.querySelectorAll(".camera-card");
+                    const cameras = ["cam1", "cam2", "cam3", "cam4", "cam5", "cam6", "cam7", "cam8", "cam9", "cam10", "cam11", "cam12"];
+                    
+                    cameras.forEach((camId, index) => {
+                        if (cards[index] && data[camId]) {
+                            const statusEl = cards[index].querySelector(".camera-status");
+                            if (statusEl) {
+                                const currentText = statusEl.textContent.substring(2); // Enlever emoji actuel
+                                if (data[camId].online) {
+                                    statusEl.innerHTML = "🟢 " + currentText;
+                                    statusEl.className = "camera-status status-online";
+                                } else {
+                                    statusEl.innerHTML = "🔴 " + currentText;
+                                    statusEl.className = "camera-status status-offline";
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.log("Erreur:", error));
+        }
+        
+        // Lancer la mise à jour
+        setTimeout(updateCameraStatuses, 3000);
+        setInterval(updateCameraStatuses, 30000);
     </script>
 </body>
 </html>
